@@ -33,10 +33,12 @@ conformance fixtures and the consumer PRs are the next deliverables.
 
 ```
 doc/
+  protocol.md                 # the normative spec; everything else adapts to it
+  consumers.md                # consumer profiles and deviations (informative, ja)
   persona-module-handoff.md   # the handoff: inventory, protocol invariants,
                               # design constraints, open questions, plan (ja)
   auth-removal-plan.md        # design history, copied from another-sgms (ja)
-  decisions/                  # decision records for the handoff's open points
+  decisions/                  # decision records (ja)
 gems/persona/                 # Ruby gem: seams, OIDC verifier contract,
                               # AccountLink (storage-port based), LinkStore
 packages/core/                # TS: agent-id holder, join handshake,
