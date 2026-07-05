@@ -1,0 +1,24 @@
+{
+  "name": "@uniba-commons/persona-server-core",
+  "version": "0.1.0",
+  "description": "Server-side core for persona-kit's cookie profile: signed session tokens, single-use claim codes, and the claim decision table. Web Crypto only — Node 18+, edge, workers.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@uniba-commons/persona-core": "*"
+  }
+}

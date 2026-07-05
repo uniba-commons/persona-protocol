@@ -13,11 +13,12 @@ persona-kit の約束: **consumer はモジュールを更新するだけで新�
 
 ## Phase 1 — consumer 化
 
-- `conformance/` fixture(claim 決定表 / session cookie / wire 名)と
-  両言語のランナー
-- TS `packages/server-core`: cookie profile のサーバ側共通部
-  (session の sign / verify、claim code、link store 契約)。
+- ✅ `conformance/` fixture(claim 決定表 / session cookie / claim code /
+  wire 名)と両言語のランナー
+- ✅ TS `packages/server-core`: cookie profile のサーバ側共通部
+  (session の sign / verify、claim code、claim 決定表)。
   hono / next など framework adapter はこの上の薄い層にする
+- `packages/server-core` に link store 契約(OIDC round-trip 用)を追加
 - `packages/hono` adapter(my-local-3-hono の `src/identity.ts` を置換)
 - another-sgms / my-local-3-hono の consumer 化 PR(同時着地、順序なし)
 

@@ -1,0 +1,24 @@
+{
+  "spec": "doc/protocol.md §6 (P-7)",
+  "normalize": [
+    { "input": "3f7k-9b2d-qxw4-m8zp", "normalized": "3F7K9B2DQXW4M8ZP" },
+    { "input": "  3F7K 9B2D\nQXW4-M8ZP  ", "normalized": "3F7K9B2DQXW4M8ZP" },
+    { "input": "abc・123", "normalized": "ABC123" },
+    { "input": "", "normalized": "" }
+  ],
+  "format": [
+    { "input": "3F7K9B2DQXW4M8ZP", "formatted": "3F7K-9B2D-QXW4-M8ZP" },
+    { "input": "3f7k-9b2d-qxw4-m8zp", "formatted": "3F7K-9B2D-QXW4-M8ZP" },
+    { "input": "ABC123", "formatted": "ABC1-23" }
+  ],
+  "digest": [
+    {
+      "input": "3F7K-9B2D-QXW4-M8ZP",
+      "sha256_hex": "2f727280f70cdaba0a6fe60c6bacb39a64f7cfc0109857c5064d4857ec565370"
+    },
+    {
+      "input": "abc 123",
+      "sha256_hex": "e0bebd22819993425814866b62701e2919ea26f1370499c1037b53b9d49c2c8a"
+    }
+  ]
+}

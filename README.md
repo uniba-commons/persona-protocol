@@ -41,21 +41,26 @@ doc/
                               # design constraints, open questions, plan (ja)
   auth-removal-plan.md        # design history, copied from another-sgms (ja)
   decisions/                  # decision records (ja)
-gems/persona/                 # Ruby gem: seams, OIDC verifier contract,
-                              # AccountLink (storage-port based), LinkStore
+conformance/                  # shared cross-language test vectors (§10 of
+                              # the spec); run by both implementations
+gems/persona/                 # Ruby gem: seams, OIDC provider registry,
+                              # AccountLink (storage-port based), LinkStore,
+                              # ClaimCode
 packages/core/                # TS: agent-id holder, join handshake,
                               # wire-protocol names; no dependencies
+packages/server-core/         # TS: cookie-profile server core — session
+                              # tokens, claim codes, claim decision table
 packages/apollo/              # TS: Apollo links (X-Agent-Id, NOT_JOINED retry)
 packages/cable/               # TS: ActionCable agent_id query param
 examples/                     # how a Rails consumer wires the seams and
                               # implements the AccountLink storage port
 ```
 
-Build & test:
+Build & test (both suites include the shared conformance vectors):
 
 ```
 cd gems/persona && bundle install && bundle exec rspec   # Ruby
-npm install && npm run build                             # TypeScript
+npm install && npm test                                  # TypeScript
 ```
 
 ## Where to start

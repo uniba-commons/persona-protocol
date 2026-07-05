@@ -5,10 +5,12 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @uniba-commons/persona-core && npm run build -w @uniba-commons/persona-apollo -w @uniba-commons/persona-cable",
+    "build": "npm run build -w @uniba-commons/persona-core && npm run build -w @uniba-commons/persona-server-core -w @uniba-commons/persona-apollo -w @uniba-commons/persona-cable",
+    "test": "npm run build && vitest run",
     "clean": "rm -rf packages/*/dist"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
   }
 }

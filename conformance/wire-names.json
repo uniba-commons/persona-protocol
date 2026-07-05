@@ -1,0 +1,6 @@
+{
+  "spec": "doc/protocol.md §10.3 (H-2, P-2)",
+  "agent_id_header": "X-Agent-Id",
+  "agent_id_param": "agent_id",
+  "not_joined_code": "NOT_JOINED"
+}

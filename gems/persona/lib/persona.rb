@@ -1,6 +1,7 @@
 require 'securerandom'
 
 require_relative 'persona/version'
+require_relative 'persona/claim_code'
 require_relative 'persona/oidc'
 require_relative 'persona/oidc/link_store'
 require_relative 'persona/account_link'
