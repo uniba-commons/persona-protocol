@@ -26,7 +26,8 @@ without Rails, and the TypeScript side builds as three workspace packages
 with no runtime dependencies. See
 [doc/decisions/0001-de-appification.md](doc/decisions/0001-de-appification.md)
 for what was decided (and what is still open). The protocol spec
-(`doc/protocol.md`) is the next deliverable.
+([doc/protocol.md](doc/protocol.md), draft v0.1) now covers both transports;
+conformance fixtures and the consumer PRs are the next deliverables.
 
 ## Layout
 
@@ -55,8 +56,9 @@ npm install && npm run build                             # TypeScript
 
 ## Where to start
 
-Read `doc/persona-module-handoff.md`. Its §3 lists the protocol invariants —
-the protocol spec (`doc/protocol.md`, to be written) is the primary
-deliverable; language packages are adapters around it.
+Read [doc/protocol.md](doc/protocol.md) — the normative spec covering both
+transports (header and cookie); language packages are adapters around it.
+For background, `doc/persona-module-handoff.md` is the original handoff and
+`doc/decisions/` records how its open points were settled.
 
 Publishing target: the `uniba-commons` GitHub org (later; local-only for now).
