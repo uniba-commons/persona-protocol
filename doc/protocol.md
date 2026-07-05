@@ -82,10 +82,29 @@ These hold in every profile; the profiles only differ in carriage.
   carries the browser's credential — the browser, not the redirect, is the
   entity.
 
+### Choosing a profile
+
+The profiles differ in **where the credential is available**, not in how much
+client scripting an application has:
+
+- **Header profile (§3)** — the credential lives in client-held storage and
+  is attached by client code. Fits API-separated clients: SPAs, native
+  mobile apps, CLI tools — anything without (or outside) a cookie jar. The
+  server cannot personalize server-rendered HTML on first load.
+- **Cookie profile (§4)** — the credential lives in the browser's cookie jar
+  and reaches the server on every request automatically, including
+  server-side rendering, streaming responses, form posts, WebSocket
+  handshakes, and Server-Sent Events. Fits fully server-rendered stacks
+  *and* hybrid SSR frameworks with rich clients.
+
+An application MUST treat exactly one profile as its source of identity
+truth; mixing both invites conflicting credentials.
+
 ## 3. Header transport profile
 
 For stacks whose client can set request headers (typically a script-driven
-client talking to an API).
+client talking to an API) and which do not need the credential during
+server-side rendering.
 
 - **H-1:** The **browser generates** the agent_uid (MUST). The server
   accepts a previously-unknown agent_uid at join. This keeps the door open
@@ -111,9 +130,13 @@ client talking to an API).
 
 ## 4. Cookie transport profile
 
-For server-rendered stacks with little or no client scripting. The browser
-never handles the agent_uid; a **signed session cookie** carries a reference
-to the persona, and the agent_uid lives server-side as the persona's anchor.
+For stacks where the server needs the credential at render time: fully
+server-rendered applications, and hybrid SSR frameworks that also run rich
+client code. The browser never handles the agent_uid; a **signed session
+cookie** carries a reference to the persona, and the agent_uid lives
+server-side as the persona's anchor. Because cookies ride automatically on
+same-origin requests, no additional carriage is needed for WebSocket
+handshakes or streamed responses.
 
 - **C-1:** The session cookie MUST be integrity-protected with a MAC (e.g.
   HMAC-SHA256) over a payload containing at least the persona reference and
@@ -127,13 +150,21 @@ to the persona, and the agent_uid lives server-side as the persona's anchor.
   a claim code (MUST). The agent_uid itself never appears on the wire in
   this profile.
 - **C-4:** `NOT_JOINED` carriage: server middleware rejects un-joined writes
-  and routes the browser to the join flow (MUST) — in a server-rendered
-  application, typically a redirect. Writes that guests may perform (the
-  join flow itself, claim consumption, and similar bootstrap actions) SHOULD
-  be an explicit allowlist.
+  and routes the browser toward the join flow (MUST). The response shape
+  follows the caller: a redirect for full-page navigation, a fragment
+  containing a join affordance for partial updates, or a machine-readable
+  `NOT_JOINED` result for scripted callers (RPC-style endpoints, server
+  actions). Writes that guests may perform (the join flow itself, claim
+  consumption, and similar bootstrap actions) SHOULD be an explicit
+  allowlist.
 - **C-5:** The session MAY additionally carry a per-browser identifier, e.g.
   to render a "browsers using this persona" list. Such an identifier is
   metadata: it MUST NOT be trusted as a credential on its own.
+- **C-6:** Rich clients often need to know *whether* the browser has joined
+  (to render join affordances eagerly) without touching the credential.
+  Applications MAY expose non-secret persona metadata — a joined flag, a
+  display name — through rendered content or a separate non-credential
+  cookie. The credential cookie itself MUST remain `HttpOnly` regardless.
 
 ## 5. Join handshake
 
@@ -187,6 +218,9 @@ of this table:
   bindings, and domain data to the target, then retires the source (MUST).
   The direction is always *acting persona → holder*; the subject's
   attachment never moves.
+- **P-13a:** A (provider, subject) pair MUST resolve to at most one persona
+  at any time — that persona is the holder. A persona MAY hold any number of
+  account bindings, across providers and within one.
 
 Claim-code lifecycle (concretizing P-7):
 
@@ -206,6 +240,13 @@ round-trip with an external identity provider. The capability is optional:
 a deployment MUST be able to disable it entirely, leaving its endpoints and
 mutations inert.
 
+A deployment MAY register several providers at once; every account binding
+records which provider vouched for it (P-5, P-13a). Implementations SHOULD
+structure provider support as a registry behind one contract — name,
+authorize-URL construction, callback verification — so an application gains
+a new provider (a public IdP, an organization's own) by updating the library
+and registering it, not by reimplementing the flow.
+
 ```
 begin ──▶ authorize (IdP) ──▶ callback ──▶ complete
   |             |                 |             |
@@ -214,13 +255,15 @@ begin ──▶ authorize (IdP) ──▶ callback ──▶ complete
   | pending     |                 | as link_token| claim table (§6)
 ```
 
-1. **begin** — a credentialed request. The server issues an opaque `state`,
-   stores `state → agent_uid` short-lived, and returns the IdP authorize URL.
+1. **begin** — a credentialed request naming a registered provider. The
+   server issues an opaque `state`, stores `state → (agent_uid, provider)`
+   short-lived, and returns that provider's authorize URL.
 2. **authorize** — the browser navigates to the IdP and authenticates.
-3. **callback** — the server verifies the outcome through its configured
-   verifier (contract: `verify(params) -> Identity(provider, subject) | nil`),
-   consumes the `state` **once** to recover which browser initiated, stores
-   the verified result under an opaque `link_token`, and redirects into the
+3. **callback** — the server consumes the `state` **once** to recover which
+   browser initiated and for which provider, verifies the outcome through
+   that provider (contract:
+   `verify(params) -> Identity(provider, subject) | nil`), stores the
+   verified result under an opaque `link_token`, and redirects into the
    application UI with only that token.
 4. **complete** — a credentialed request presents the `link_token`; the
    server runs the claim table (§6). Because a merge preview may require a

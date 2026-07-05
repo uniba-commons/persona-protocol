@@ -1,7 +1,7 @@
-describe Persona::Oidc::StubVerifier do
+describe Persona::Oidc::StubProvider do
   it 'builds a persona identity from the sub param' do
     identity = described_class.new.verify(sub: 'person_1')
-    expect(identity.provider).to eq 'uniba-auth'
+    expect(identity.provider).to eq 'stub'
     expect(identity.subject).to eq 'person_1'
   end
 
@@ -9,11 +9,27 @@ describe Persona::Oidc::StubVerifier do
     expect(described_class.new.verify({})).to be_nil
     expect(described_class.new.verify(sub: '')).to be_nil
   end
+
+  it 'can impersonate a named provider for local development' do
+    identity = described_class.new(name: 'example-idp').verify(sub: 'person_1')
+    expect(identity.provider).to eq 'example-idp'
+  end
+
+  it 'escapes the state into its authorize URL' do
+    url = described_class.new.authorize_url(state: 'a b&c')
+    expect(url).to eq '/auth/oidc/start?state=a+b%26c'
+  end
 end
 
-describe Persona::Oidc, '.authorize_url' do
-  it 'escapes the state into the local authorize path' do
-    expect(described_class.authorize_url(state: 'a b&c')).to eq '/auth/oidc/start?state=a+b%26c'
+describe Persona, 'OIDC provider registry' do
+  it 'resolves providers by name' do
+    provider = Persona.config.register_oidc_provider(Persona::Oidc::StubProvider.new(name: 'example-idp'))
+    expect(Persona.oidc_provider('example-idp')).to be provider
+  end
+
+  it 'raises ConfigurationError for a provider that was never registered' do
+    expect { Persona.oidc_provider('google') }
+      .to raise_error(Persona::ConfigurationError, /register_oidc_provider/)
   end
 end
 

@@ -34,7 +34,9 @@ conformance fixtures and the consumer PRs are the next deliverables.
 ```
 doc/
   protocol.md                 # the normative spec; everything else adapts to it
-  consumers.md                # consumer profiles and deviations (informative, ja)
+  consumers.md                # consumer profiles, incl. a fictional third
+                              # consumer used to stress the design (ja)
+  roadmap.md                  # phases; consumers gain features by updating (ja)
   persona-module-handoff.md   # the handoff: inventory, protocol invariants,
                               # design constraints, open questions, plan (ja)
   auth-removal-plan.md        # design history, copied from another-sgms (ja)

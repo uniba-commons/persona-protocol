@@ -6,12 +6,13 @@ module Persona
     # Short-lived Redis storage that ties the OIDC redirect round-trip to the
     # browser that started it — without ever putting the agent_uid in a URL.
     #
-    #   beginAccountLink : put_pending(state, agent_uid)
-    #   /auth/oidc/callback : take_pending(state) -> agent_uid  (single use)
+    #   begin            : put_pending(state, agent_uid:, provider:)
+    #   /auth/oidc/callback : take_pending(state) -> {agent_uid:, provider:}
+    #                                                            (single use)
     #                         put_result(link_token, ...)       hands the
     #                                                            verified subject
     #                                                            back to the app
-    #   completeAccountLink : peek_result(link_token) -> {...}  (non-destructive,
+    #   complete         : peek_result(link_token) -> {...}     (non-destructive,
     #                                                            so the merge
     #                                                            confirm can re-read)
     #                         drop_result(link_token)           on final success
@@ -33,8 +34,11 @@ module Persona
         SecureRandom.urlsafe_base64(32)
       end
 
-      def put_pending(state, agent_uid)
-        write(PENDING_PREFIX + state, { agent_uid: agent_uid }, PENDING_TTL)
+      # provider records which registered IdP this round-trip was begun for,
+      # so the callback verifies against the same provider (multi-provider
+      # deployments; doc/protocol.md §7).
+      def put_pending(state, agent_uid:, provider:)
+        write(PENDING_PREFIX + state, { agent_uid: agent_uid, provider: provider }, PENDING_TTL)
       end
 
       # Consumes the pending entry (state is single-use, CSRF-style).

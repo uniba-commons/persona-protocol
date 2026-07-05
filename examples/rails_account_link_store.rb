@@ -1,7 +1,5 @@
 # An ActiveRecord implementation of the Persona::AccountLink storage port —
-# example for a Rails consumer, equivalent to the inline model calls
-# Persona::AccountLink made before the extraction (another-sgms branch
-# sgms-17). The host models are:
+# example for a Rails consumer whose models look like:
 #
 #   User            the persona; User.join_as_guest! creates a guest already
 #                   bound to its agent_uid and runs the app's join side

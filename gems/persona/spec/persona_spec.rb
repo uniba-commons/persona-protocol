@@ -20,7 +20,7 @@ describe Persona do
       expect(config.on_join.call(:user)).to be_nil
       expect(config.guest_nickname_generator.call).to match(/\A[a-z]+-[a-z]+-\h{4}\z/)
       expect(config.guest_email_factory.call).to match(/\Aagent-\h{16}@guest\.local\z/)
-      expect(config.oidc_verifier).to be_a(Persona::Oidc::StubVerifier)
+      expect(config.oidc_providers).to eq({})
       expect(config.account_link_store).to be_nil
       expect(config.link_store).to be_nil
     end

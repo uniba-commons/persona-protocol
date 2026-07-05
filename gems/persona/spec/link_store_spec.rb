@@ -3,13 +3,13 @@ describe Persona::Oidc::LinkStore do
   let(:store) { described_class.new(redis: redis) }
 
   describe '#put_pending / #take_pending' do
-    it 'round-trips the agent_uid keyed by state' do
-      store.put_pending('state-1', 'agent-a')
-      expect(store.take_pending('state-1')).to eq(agent_uid: 'agent-a')
+    it 'round-trips the initiating browser and provider keyed by state' do
+      store.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp')
+      expect(store.take_pending('state-1')).to eq(agent_uid: 'agent-a', provider: 'example-idp')
     end
 
     it 'is single use: the second take returns nil' do
-      store.put_pending('state-1', 'agent-a')
+      store.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp')
       store.take_pending('state-1')
       expect(store.take_pending('state-1')).to be_nil
     end
@@ -19,18 +19,18 @@ describe Persona::Oidc::LinkStore do
     end
 
     it 'writes with the pending TTL' do
-      store.put_pending('state-1', 'agent-a')
+      store.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp')
       expect(redis.ttls.values).to eq [described_class::PENDING_TTL]
     end
   end
 
   describe '#put_result / #peek_result / #drop_result' do
     before do
-      store.put_result('token-1', provider: 'uniba-auth', subject: 'person-1', agent_uid: 'agent-a')
+      store.put_result('token-1', provider: 'example-idp', subject: 'person-1', agent_uid: 'agent-a')
     end
 
     it 'peeks non-destructively so the merge confirm can re-read' do
-      expected = { provider: 'uniba-auth', subject: 'person-1', agent_uid: 'agent-a' }
+      expected = { provider: 'example-idp', subject: 'person-1', agent_uid: 'agent-a' }
       expect(store.peek_result('token-1')).to eq expected
       expect(store.peek_result('token-1')).to eq expected
     end
@@ -48,8 +48,8 @@ describe Persona::Oidc::LinkStore do
   describe 'redis injection styles' do
     it 'accepts a connection pool responding to #with' do
       pooled = described_class.new(redis: FakeRedisPool.new(redis))
-      pooled.put_pending('state-1', 'agent-a')
-      expect(pooled.take_pending('state-1')).to eq(agent_uid: 'agent-a')
+      pooled.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp')
+      expect(pooled.take_pending('state-1')).to eq(agent_uid: 'agent-a', provider: 'example-idp')
     end
   end
 

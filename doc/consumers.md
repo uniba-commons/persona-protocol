@@ -1,8 +1,11 @@
 # Consumer プロファイル(informative)
 
-persona-kit の想定 consumer 2 者の現状スナップショットと、protocol
+persona-kit の想定 consumer の現状スナップショットと、protocol
 ([protocol.md](protocol.md))の概念との対応。**本書は informative** —
 spec は consumer に依存せず、本書だけが consumer を知る。
+
+consumer は実在 2 者(another-sgms / my-local-3-hono)+ 設計を鍛えるための
+**架空 1 者(yorimichi、§架空 consumer)**。spec の変更は 3 者すべてで検証する。
 
 ## 対応表
 
@@ -41,6 +44,52 @@ join フローの対応(protocol.md §5 の表の具体例):
   実例なし(現状すべて redirect)。実例が出たら C-4 に還流する。
 - **another-sgms: OIDC の state をブラウザセッションに未結線**(P-16a)。
   IdP 本実装時に引き上げる。
+
+## 架空 consumer: yorimichi(設計 fixture)
+
+実装しない第 3 の consumer。実在 2 者がどちらも「Rails SPA」「htmx
+server-rendered」という両極で、その間にある**モダンなハイブリッド構成**の想定が
+抜けやすいため、設計変更のたびに「yorimichi で成立するか」を問う fixture として置く。
+
+**想定アプリ**: 通勤・散歩の寄り道メモを地図に残す PWA。匿名で始まり、
+ペルソナをブラウザに宿し、スマホ+PC で使うために claim code を使う。
+
+**アーキテクチャ(2026 年時点のモダン構成を意図的に寄せ集め)**:
+
+| 層 | 選択 |
+|---|---|
+| フレームワーク | Next.js App Router(RSC + Server Actions、streaming SSR) |
+| ランタイム | edge(Web Crypto のみ、Node API なし、多リージョン) |
+| DB | serverless Postgres(HTTP driver) |
+| realtime | SSE(presence)+ 同一オリジン WebSocket |
+| クライアント | rich client(React)+ PWA(offline キュー、Background Sync) |
+| transport profile | **cookie**(SSR personalization に credential が要るため) |
+| account linking | Google + 組織 IdP の 2 provider 併用 |
+
+**この fixture が既に spec に還流させたもの**:
+
+- profile の選択基準を「クライアント JS の量」から「**render 時に credential が
+  どこで要るか**」に再定義(§2 Choosing a profile)。rich client でも SSR するなら
+  cookie profile が正、という帰結は yorimichi なしでは出てこなかった。
+- `NOT_JOINED` の cookie profile 運搬を caller 依存に一般化(C-4: redirect /
+  fragment / RPC・server action の typed result)。
+- rich client が credential に触れずに join 状態を知る手段(C-6: non-secret
+  metadata、credential cookie は HttpOnly のまま)。
+- 複数 provider の同時登録(§7 registry、P-13a)。
+- cookie profile では WS / SSE に追加の運搬が不要(§4 冒頭)— header profile の
+  query param fallback(H-2)が ActionCable 固有の妥協だったことの裏づけ。
+
+**未解決の stress(spec の宿題)**:
+
+- **offline キューと join**: Background Sync が未 join のまま書き込みを flush
+  したときの `NOT_JOINED` 再処理。クライアント adapter の関心だが、spec が
+  「リトライは冪等であるべき」程度の指針を持つべきかは未定。
+- **多リージョン edge での claim 原子性**: P-7 の原子的消費は単一 DB なら自明だが、
+  リージョン分散 KV に claim code を置くと壊れる。「claim の消費は単一の
+  linearizable なストアで行う (SHOULD)」の追記候補。
+- **native アプリ版 yorimichi**(cookie jar なし)を作るなら header profile との
+  併存になる — 「1 アプリ 1 profile」原則(§2)と「同一ペルソナを 2 profile の
+  デプロイが共有する」ことの整理。
 
 ## consumer 化 PR の参照元
 

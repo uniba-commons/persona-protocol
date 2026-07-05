@@ -1,14 +1,14 @@
-# Wire an app's domain into the generic Persona core — example for a Rails
-# consumer (adapted from another-sgms).
+# Wire an application's domain into the generic Persona core — example for a
+# Rails consumer.
 #
 # to_prepare (not a plain initializer body) so the wiring is re-applied on
 # every code reload in development; otherwise reloadable app classes
 # referenced from the config would go stale after the first reload.
 Rails.application.config.to_prepare do
   Persona.configure do |config|
-    # When a browser joins, enroll it in the default team. Project / track
-    # (会議体) tracing happens in the app's join mutation instead, which
-    # has the request's project_id / track_id context.
+    # Domain side effects to run when a browser joins. Keep request-scoped
+    # concerns (tracing which page triggered the join, etc.) in the app's
+    # join endpoint instead — this hook only sees the user.
     config.on_join = ->(user) { user.join_default_team! }
 
     # Account linking (only needed when PERSONA_ACCOUNT_LINKING is on):
@@ -20,5 +20,12 @@ Rails.application.config.to_prepare do
     # The AccountLink storage port, implemented on the app's models —
     # see rails_account_link_store.rb next to this file.
     config.account_link_store = RailsAccountLinkStore.new
+
+    # Identity providers, one registration per IdP the deployment links to.
+    # Registering nothing means no provider can ever verify. The stub trusts
+    # callback params — development only, never production.
+    if Rails.env.development?
+      config.register_oidc_provider(Persona::Oidc::StubProvider.new(name: 'example-idp'))
+    end
   end
 end

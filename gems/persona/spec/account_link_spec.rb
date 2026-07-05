@@ -1,6 +1,6 @@
 describe Persona::AccountLink do
   let(:store) { FakeAccountLinkStore.new }
-  let(:identity) { Persona::Oidc::Identity.new(provider: 'uniba-auth', subject: 'person-1') }
+  let(:identity) { Persona::Oidc::Identity.new(provider: 'example-idp', subject: 'person-1') }
 
   def perform(current_user:, agent_uid:, confirm_merge: false)
     described_class.perform(
@@ -9,7 +9,7 @@ describe Persona::AccountLink do
     )
   end
 
-  def bind_account(user, provider: 'uniba-auth', subject: 'person-1')
+  def bind_account(user, provider: 'example-idp', subject: 'person-1')
     store.add_account_binding!(user, provider: provider, subject: subject)
   end
 
@@ -28,7 +28,7 @@ describe Persona::AccountLink do
             result = perform(current_user: nil, agent_uid: 'agent-new')
           }.to change { store.users.count }.by(1)
 
-          expect(store.holder_for(provider: 'uniba-auth', subject: 'person-1').id).to eq result.user.id
+          expect(store.holder_for(provider: 'example-idp', subject: 'person-1').id).to eq result.user.id
           expect(store.agent_binding?(result.user, agent_uid: 'agent-new')).to be true
           expect(result.agent_uid).to eq 'agent-new'
           expect(result.merged).to eq false
@@ -62,7 +62,7 @@ describe Persona::AccountLink do
           result = perform(current_user: current_user, agent_uid: 'agent-y')
 
           expect(result.user.id).to eq current_user.id
-          expect(store.holder_for(provider: 'uniba-auth', subject: 'person-1').id).to eq current_user.id
+          expect(store.holder_for(provider: 'example-idp', subject: 'person-1').id).to eq current_user.id
           expect(result.merged).to eq false
           expect(result.agent_uid).to be_nil
         end
@@ -111,7 +111,7 @@ describe Persona::AccountLink do
           # This browser's agent_uid has moved over to X.
           expect(store.user_for_agent('agent-y').id).to eq holder.id
           # The subject's binding stays on X.
-          expect(store.holder_for(provider: 'uniba-auth', subject: 'person-1').id).to eq holder.id
+          expect(store.holder_for(provider: 'example-idp', subject: 'person-1').id).to eq holder.id
         end
       end
     end

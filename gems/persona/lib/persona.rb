@@ -6,8 +6,8 @@ require_relative 'persona/oidc/link_store'
 require_relative 'persona/account_link'
 
 # Persona — the app-agnostic core of the "anonymous identity you carry per
-# browser" mechanism. See doc/auth-removal-plan.md for the design history and
-# doc/persona-module-handoff.md for the module boundary.
+# browser" mechanism. The protocol itself is specified in doc/protocol.md;
+# this gem is one adapter around it.
 #
 # The identity records themselves (agent_uid -> user resolution, guest
 # creation, bindings, recovery codes, merge) live on the consumer's models.
@@ -16,7 +16,7 @@ require_relative 'persona/account_link'
 #   - on_join                  domain side effects to run when a browser joins
 #   - guest_nickname_generator what a fresh guest is named when none is given
 #   - guest_email_factory      the placeholder identifier stored on a new guest
-#   - oidc_verifier            verify(params) -> Oidc::Identity | nil
+#   - oidc_providers           registered identity providers (see oidc.rb)
 #   - account_link_store       the AccountLink storage port (see account_link.rb)
 #   - link_store               the OIDC round-trip store (see oidc/link_store.rb)
 #   - AGENT_ID_HEADER / AGENT_ID_PARAM / NOT_JOINED_CODE  the wire protocol
@@ -25,10 +25,9 @@ require_relative 'persona/account_link'
 module Persona
   class ConfigurationError < StandardError; end
 
-  # HTTP header and WebSocket query param (e.g. ActionCable can't set custom
-  # headers) that carry the browser-generated agent_uid. The value itself is
-  # never echoed back in responses — see the lock-in avoidance protocol in
-  # doc/auth-removal-plan.md.
+  # HTTP header and WebSocket query param (for transports that can't set
+  # custom headers) that carry the browser-generated agent_uid. The value
+  # itself is never echoed back in responses — doc/protocol.md P-3 / H-3.
   AGENT_ID_HEADER = 'X-Agent-Id'.freeze
   AGENT_ID_PARAM = 'agent_id'.freeze
 
@@ -72,9 +71,15 @@ module Persona
     # Builds the placeholder email/identifier persisted on a new guest user.
     attr_accessor :guest_email_factory
 
-    # Verifies an OIDC callback into a Persona::Oidc::Identity. Defaults to
-    # the local stub; production swaps in a JWKS-checking verifier.
-    attr_accessor :oidc_verifier
+    # Registered OIDC providers by name (see Persona::Oidc for the provider
+    # contract). Empty by default: register providers explicitly, including
+    # the development stub — an unregistered provider can never verify.
+    attr_reader :oidc_providers
+
+    def register_oidc_provider(provider)
+      @oidc_providers[provider.name] = provider
+      provider
+    end
 
     # Storage port for AccountLink — an object implementing the contract
     # documented in Persona::AccountLink. No default: consumers that enable
@@ -90,7 +95,7 @@ module Persona
       @on_join = ->(_user) {}
       @guest_nickname_generator = -> { Persona.generate_nickname }
       @guest_email_factory = -> { "agent-#{SecureRandom.hex(8)}@guest.local" }
-      @oidc_verifier = Oidc::StubVerifier.new
+      @oidc_providers = {}
       @account_link_store = nil
       @link_store = nil
     end
@@ -112,6 +117,15 @@ module Persona
 
     def generate_nickname
       "#{NICKNAME_ADJECTIVES.sample}-#{NICKNAME_NOUNS.sample}-#{SecureRandom.hex(2)}"
+    end
+
+    # Resolves a registered OIDC provider by name; unknown names raise so a
+    # begin/callback for a provider the app never registered fails loudly.
+    def oidc_provider(name)
+      config.oidc_providers.fetch(name) do
+        raise ConfigurationError, "unknown OIDC provider #{name.inspect} — " \
+                                  'register it via Persona.config.register_oidc_provider'
+      end
     end
 
     # Account linking (OIDC binding to an external IdP) is opt-in and off by
