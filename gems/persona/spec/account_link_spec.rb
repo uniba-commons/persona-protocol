@@ -1,111 +1,132 @@
-require 'rails_helper'
-
 describe Persona::AccountLink do
+  let(:store) { FakeAccountLinkStore.new }
   let(:identity) { Persona::Oidc::Identity.new(provider: 'uniba-auth', subject: 'person-1') }
 
-  def bind_account(user, subject: 'person-1', provider: 'uniba-auth')
-    user.account_bindings.create!(provider: provider, subject: subject)
+  def perform(current_user:, agent_uid:, confirm_merge: false)
+    described_class.perform(
+      identity: identity, current_user: current_user, agent_uid: agent_uid,
+      confirm_merge: confirm_merge, store: store,
+    )
+  end
+
+  def bind_account(user, provider: 'uniba-auth', subject: 'person-1')
+    store.add_account_binding!(user, provider: provider, subject: subject)
   end
 
   describe '.perform' do
-    context '匿名ブラウザ（current_user なし）' do
-      context 'その subject の holder がまだ居ないとき' do
-        it 'ゲストを新規作成して subject と agent_uid を紐づける（サインアップ）' do
+    it 'raises ConfigurationError when no store is configured' do
+      expect {
+        described_class.perform(identity: identity, current_user: nil, agent_uid: 'agent-a')
+      }.to raise_error(Persona::ConfigurationError, /account_link_store/)
+    end
+
+    context 'with an anonymous browser (no current_user)' do
+      context 'when the subject has no holder yet' do
+        it 'creates a guest bound to both the subject and the agent_uid (sign-up)' do
           result = nil
           expect {
-            result = described_class.perform(identity: identity, current_user: nil, agent_uid: 'agent-new')
-          }.to change { User.unscoped.count }.by(1)
+            result = perform(current_user: nil, agent_uid: 'agent-new')
+          }.to change { store.users.count }.by(1)
 
-          expect(result.user.account_bindings.find_by(provider: 'uniba-auth', subject: 'person-1')).to be_present
-          expect(result.user.agent_bindings.find_by(agent_uid: 'agent-new')).to be_present
+          expect(store.holder_for(provider: 'uniba-auth', subject: 'person-1').id).to eq result.user.id
+          expect(store.agent_binding?(result.user, agent_uid: 'agent-new')).to be true
           expect(result.agent_uid).to eq 'agent-new'
           expect(result.merged).to eq false
           expect(result.merge_preview).to be_nil
         end
       end
 
-      context 'その subject の holder が既に居るとき' do
-        it 'holder を採用し、このブラウザの agent_uid を holder に足す（別ブラウザからの復元）' do
-          holder = User.join_as_guest!('agent-holder')
+      context 'when the subject already has a holder' do
+        it "adopts the holder and adds this browser's agent_uid (restore from another browser)" do
+          holder = store.create_guest!(agent_uid: 'agent-holder')
           bind_account(holder)
 
           result = nil
           expect {
-            result = described_class.perform(identity: identity, current_user: nil, agent_uid: 'agent-second')
-          }.not_to(change { User.unscoped.count })
+            result = perform(current_user: nil, agent_uid: 'agent-second')
+          }.not_to(change { store.users.count })
 
           expect(result.user.id).to eq holder.id
-          expect(holder.agent_bindings.find_by(agent_uid: 'agent-second')).to be_present
+          expect(store.agent_binding?(holder, agent_uid: 'agent-second')).to be true
           expect(result.agent_uid).to eq 'agent-second'
           expect(result.merged).to eq false
         end
       end
     end
 
-    context '参加済みブラウザ（current_user = Y）' do
-      let(:current_user) { User.join_as_guest!('agent-y') }
+    context 'with a joined browser (current_user = Y)' do
+      let(:current_user) { store.create_guest!(agent_uid: 'agent-y') }
 
-      context 'その subject がまだ誰にも紐づいていないとき' do
-        it '現ペルソナにアカウントをリンクする（merge なし・agent_uid 変更なし）' do
-          result = described_class.perform(identity: identity, current_user: current_user, agent_uid: 'agent-y')
+      context 'when the subject is not yet bound to anyone' do
+        it 'links the account to the acting persona (no merge, no agent_uid echo)' do
+          result = perform(current_user: current_user, agent_uid: 'agent-y')
 
           expect(result.user.id).to eq current_user.id
-          expect(current_user.account_bindings.find_by(subject: 'person-1')).to be_present
+          expect(store.holder_for(provider: 'uniba-auth', subject: 'person-1').id).to eq current_user.id
           expect(result.merged).to eq false
           expect(result.agent_uid).to be_nil
         end
       end
 
-      context 'その subject が既に自分に紐づいているとき' do
-        it '冪等に no-op（binding は重複しない）' do
+      context 'when the subject is already bound to the acting persona' do
+        it 'is an idempotent no-op (no duplicate binding)' do
           bind_account(current_user)
 
           expect {
-            result = described_class.perform(identity: identity, current_user: current_user, agent_uid: 'agent-y')
+            result = perform(current_user: current_user, agent_uid: 'agent-y')
             expect(result.user.id).to eq current_user.id
             expect(result.merged).to eq false
-          }.not_to(change { AccountBinding.count })
+          }.not_to(change { store.account_bindings.count })
         end
       end
 
-      context 'その subject が別ペルソナ X に紐づいているとき（衝突）' do
+      context 'when the subject is bound to a different persona X (conflict)' do
         let!(:holder) do
-          x = User.join_as_guest!('agent-x')
+          x = store.create_guest!(agent_uid: 'agent-x')
           bind_account(x)
           x
         end
 
-        it 'confirm_merge なしでは preview を返し、何も変更しない' do
+        it 'returns a preview and changes nothing without confirm_merge' do
           current_user # force creation before measuring, so the count reflects only .perform
           result = nil
           expect {
-            result = described_class.perform(identity: identity, current_user: current_user, agent_uid: 'agent-y')
-          }.not_to(change { AgentBinding.count })
+            result = perform(current_user: current_user, agent_uid: 'agent-y')
+          }.not_to(change { store.agent_bindings.count })
 
-          expect(result.merge_preview).to be_present
-          expect(result.merge_preview.target_username).to eq holder.username
+          expect(result.merge_preview).not_to be_nil
+          expect(result.merge_preview.target_id).to eq holder.id
           expect(result.merged).to eq false
-          # Y はまだ生きているし、X の binding も増えていない
-          expect(User.find_by(id: current_user.id)).to be_present
+          # Y is still alive, and X gained no bindings.
+          expect(store.user(current_user.id)).not_to be_nil
         end
 
-        it 'confirm_merge: true で Y を X に統合し、ブラウザは X を指すようになる' do
-          create(:agenda, creator: current_user, in_container: create(:meeting))
-
-          result = described_class.perform(
-            identity: identity, current_user: current_user, agent_uid: 'agent-y', confirm_merge: true,
-          )
+        it 'with confirm_merge: true folds Y into X, and the browser now points at X' do
+          result = perform(current_user: current_user, agent_uid: 'agent-y', confirm_merge: true)
 
           expect(result.merged).to eq true
           expect(result.user.id).to eq holder.id
-          # Y は discard 済み
-          expect(User.find_by(id: current_user.id)).to be_nil
-          # このブラウザの agent_uid は X に移っている
-          expect(AgentBinding.find_by(agent_uid: 'agent-y')&.user_id).to eq holder.id
-          # subject の binding は X 側に残る
-          expect(holder.account_bindings.find_by(subject: 'person-1')).to be_present
+          # Y has been retired.
+          expect(store.user(current_user.id)).to be_nil
+          # This browser's agent_uid has moved over to X.
+          expect(store.user_for_agent('agent-y').id).to eq holder.id
+          # The subject's binding stays on X.
+          expect(store.holder_for(provider: 'uniba-auth', subject: 'person-1').id).to eq holder.id
         end
       end
+    end
+  end
+
+  describe '.holder_for' do
+    it 'resolves the persona bound to the identity through the store' do
+      holder = store.create_guest!(agent_uid: 'agent-holder')
+      bind_account(holder)
+
+      expect(described_class.holder_for(identity, store: store).id).to eq holder.id
+    end
+
+    it 'returns nil for an unbound identity' do
+      expect(described_class.holder_for(identity, store: store)).to be_nil
     end
   end
 end

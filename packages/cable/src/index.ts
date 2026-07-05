@@ -1,4 +1,4 @@
-import { getAgentId } from './agent_id';
+import { AGENT_ID_PARAM, getAgentId } from '@uniba-commons/persona-core';
 
 // ActionCable can't set custom headers, so the browser's agent_uid rides as a
 // query param on the cable URL instead. Appends &agent_id=... when the visitor
@@ -7,5 +7,5 @@ import { getAgentId } from './agent_id';
 // string (e.g. `/cable?session_id=...`).
 export const appendAgentId = (baseUrl: string): string => {
   const agentId = getAgentId();
-  return agentId ? `${baseUrl}&agent_id=${encodeURIComponent(agentId)}` : baseUrl;
+  return agentId ? `${baseUrl}&${AGENT_ID_PARAM}=${encodeURIComponent(agentId)}` : baseUrl;
 };

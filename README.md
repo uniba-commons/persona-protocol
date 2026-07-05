@@ -20,10 +20,13 @@ done only when both consumers run on it.
 
 ## Status
 
-Seeded (pre-v0). All code is copied **verbatim** from another-sgms branch
-`sgms-17` and is not yet buildable standalone — the Ruby side still assumes
-Rails/ActiveSupport and the specs still expect the host app's `rails_helper`.
-De-appification is the first work item; see the handoff.
+De-appified (pre-v0). The seed (verbatim copy from another-sgms branch
+`sgms-17`) has been made standalone: the Ruby gem builds and its specs run
+without Rails, and the TypeScript side builds as three workspace packages
+with no runtime dependencies. See
+[doc/decisions/0001-de-appification.md](doc/decisions/0001-de-appification.md)
+for what was decided (and what is still open). The protocol spec
+(`doc/protocol.md`) is the next deliverable.
 
 ## Layout
 
@@ -32,10 +35,22 @@ doc/
   persona-module-handoff.md   # the handoff: inventory, protocol invariants,
                               # design constraints, open questions, plan (ja)
   auth-removal-plan.md        # design history, copied from another-sgms (ja)
-gems/persona/                 # Ruby: seams, OIDC verifier contract, AccountLink
-packages/persona/src/         # TypeScript: agent-id holder, join orchestrator,
-                              # Apollo/ActionCable transport glue
-examples/rails-initializer.rb # how a Rails consumer wires the seams
+  decisions/                  # decision records for the handoff's open points
+gems/persona/                 # Ruby gem: seams, OIDC verifier contract,
+                              # AccountLink (storage-port based), LinkStore
+packages/core/                # TS: agent-id holder, join handshake,
+                              # wire-protocol names; no dependencies
+packages/apollo/              # TS: Apollo links (X-Agent-Id, NOT_JOINED retry)
+packages/cable/               # TS: ActionCable agent_id query param
+examples/                     # how a Rails consumer wires the seams and
+                              # implements the AccountLink storage port
+```
+
+Build & test:
+
+```
+cd gems/persona && bundle install && bundle exec rspec   # Ruby
+npm install && npm run build                             # TypeScript
 ```
 
 ## Where to start

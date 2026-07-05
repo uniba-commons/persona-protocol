@@ -1,3 +1,6 @@
+require 'json'
+require 'securerandom'
+
 module Persona
   module Oidc
     # Short-lived Redis storage that ties the OIDC redirect round-trip to the
@@ -12,13 +15,19 @@ module Persona
     #                                                            so the merge
     #                                                            confirm can re-read)
     #                         drop_result(link_token)           on final success
-    module LinkStore
+    #
+    # The Redis dependency is injected: pass either a raw client (responds to
+    # #get / #set / #del) or a connection pool (responds to #with yielding a
+    # client). Consumers register the instance via Persona.config.link_store.
+    class LinkStore
       PENDING_PREFIX = 'persona:oidc:pending:'.freeze
       RESULT_PREFIX = 'persona:oidc:result:'.freeze
       PENDING_TTL = 600 # 10 min to complete the IdP round-trip
       RESULT_TTL = 300  # 5 min to finish the client-side confirm
 
-      module_function
+      def initialize(redis:)
+        @redis = redis
+      end
 
       def generate_token
         SecureRandom.urlsafe_base64(32)
@@ -48,32 +57,39 @@ module Persona
       end
 
       def drop_result(link_token)
-        RedisPool.app.with { |conn| conn.del(RESULT_PREFIX + link_token) }
+        with_redis { |conn| conn.del(RESULT_PREFIX + link_token) }
+      end
+
+      private
+
+      def with_redis(&block)
+        if @redis.respond_to?(:with)
+          @redis.with(&block)
+        else
+          yield @redis
+        end
       end
 
       def write(key, hash, ttl)
-        RedisPool.app.with { |conn| conn.set(key, hash.to_json, ex: ttl) }
+        with_redis { |conn| conn.set(key, hash.to_json, ex: ttl) }
       end
-      private_class_method :write
 
       def read(key)
-        raw = RedisPool.app.with { |conn| conn.get(key) }
-        return nil if raw.blank?
+        raw = with_redis { |conn| conn.get(key) }
+        return nil if raw.nil?
 
         JSON.parse(raw, symbolize_names: true)
       end
-      private_class_method :read
 
       def take(key)
-        RedisPool.app.with do |conn|
+        with_redis do |conn|
           raw = conn.get(key)
           conn.del(key)
-          return nil if raw.blank?
+          return nil if raw.nil?
 
           JSON.parse(raw, symbolize_names: true)
         end
       end
-      private_class_method :take
     end
   end
 end

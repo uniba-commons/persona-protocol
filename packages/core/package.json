@@ -1,0 +1,21 @@
+{
+  "name": "@uniba-commons/persona-core",
+  "version": "0.1.0",
+  "description": "Portable anonymous identity: the agent_uid holder, the join handshake, and the persona-kit wire-protocol names. Transport- and framework-agnostic.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}

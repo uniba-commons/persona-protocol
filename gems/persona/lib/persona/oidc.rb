@@ -1,9 +1,11 @@
+require 'cgi'
+
 module Persona
   # OIDC account linking — the verification half of binding a persona to an
   # external identity provider (initially uniba/auth). Only the seam and a
-  # local stub live here; the account-binding logic itself is elsewhere.
+  # local stub live here; the account-binding logic is in Persona::AccountLink.
   #
-  # See doc/development/auth-removal-plan.md and Issue #17.
+  # See doc/auth-removal-plan.md for the design history.
   module Oidc
     # Where beginAccountLink sends the browser to authenticate. With the stub
     # verifier this is our own local authorize page; the real integration
@@ -15,7 +17,7 @@ module Persona
 
     # The verified outcome of an OIDC round-trip: which provider vouched for
     # the browser, and the stable subject (personId) the token was issued
-    # for. This pair becomes an AccountBinding.
+    # for. This pair becomes an account binding.
     Identity = Struct.new(:provider, :subject, keyword_init: true)
 
     # Local / development stand-in for a real OIDC verifier. Trusts a subject
@@ -32,8 +34,8 @@ module Persona
       PROVIDER = 'uniba-auth'.freeze
 
       def verify(params)
-        subject = params[:sub].presence
-        return nil unless subject
+        subject = params[:sub]
+        return nil if subject.nil? || subject.to_s.empty?
 
         Identity.new(provider: PROVIDER, subject: subject)
       end

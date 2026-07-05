@@ -1,16 +1,13 @@
-import { ApolloLink, Observable, type Operation, fromPromise } from '@apollo/client';
+import { ApolloLink, Observable, type Operation, fromPromise } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
-import { getAgentId } from './agent_id';
-import { requestJoin } from './join_orchestrator';
+import { AGENT_ID_HEADER, NOT_JOINED_CODE, getAgentId, requestJoin } from '@uniba-commons/persona-core';
 
-// HTTP header carrying the browser's agent_uid. Kept here so the persona
-// module owns its wire protocol; the server reads the same name.
-const AGENT_ID_HEADER = 'X-Agent-Id';
+// Apollo transport adapter for persona-kit: carries the agent_uid as the
+// X-Agent-Id header and drives the join handshake off the NOT_JOINED
+// GraphQL extension code. The names themselves live in persona-core —
+// this package only owns their GraphQL/Apollo carriage.
 
-// GraphQL extension code the server raises when a mutation is attempted by a
-// visitor who hasn't opted in yet. A normal opt-in handshake signal, not an
-// exception worth surfacing (e.g. to Sentry).
-export const NOT_JOINED_CODE = 'NOT_JOINED';
+export { NOT_JOINED_CODE };
 
 // Attaches the browser's agent_uid as the X-Agent-Id header when the visitor
 // has joined. Read-only visitors carry no id and stay anonymous.
