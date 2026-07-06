@@ -25,26 +25,25 @@ De-appified (pre-v0). The seed (verbatim copy from another-sgms branch
 without Rails, and the TypeScript side builds as three workspace packages
 with no runtime dependencies. See
 [doc/decisions/0001-de-appification.md](doc/decisions/0001-de-appification.md)
-for what was decided (and what is still open). The protocol spec
-([doc/protocol.md](doc/protocol.md), draft v0.1) now covers both transports;
-conformance fixtures and the consumer PRs are the next deliverables.
+for what was decided (and what is still open). The protocol spec (draft v0.1,
+in `docs/spec/`) covers both transports and is backed by cross-language
+conformance fixtures; the consumer PRs are the next deliverable.
 
 ## Layout
 
 ```
-doc/
-  protocol.md                 # the normative spec; everything else adapts to it
+docs/                         # VitePress site (en): the normative spec, split
+  spec/                       #   into navigable chapters — the main content
+  {why,how-it-works,comparison,get-started}.md  # narrative intro & positioning
+doc/                         # internal design record (ja)
   consumers.md                # consumer profiles, incl. a fictional third
-                              # consumer used to stress the design (ja)
-  prior-art.md                # prior-art survey & positioning vs existing
-                              # systems/standards; naming risks (ja)
-  roadmap.md                  # phases; consumers gain features by updating (ja)
-  persona-module-handoff.md   # the handoff: inventory, protocol invariants,
-                              # design constraints, open questions, plan (ja)
-  auth-removal-plan.md        # design history, copied from another-sgms (ja)
-  decisions/                  # decision records (ja)
-docs/                         # VitePress site: the outward-facing self-intro
-                              # (Why / How it works / Comparison / Get started, en)
+                              # consumer used to stress the design
+  prior-art.md                # prior-art survey & positioning; naming risks
+  roadmap.md                  # phases; consumers gain features by updating
+  persona-module-handoff.md   # the handoff: inventory, invariants, plan
+  auth-removal-plan.md        # design history, copied from another-sgms
+  protocol.md                 # stub → points at docs/spec/ (spec moved there)
+  decisions/                  # decision records
 conformance/                  # shared cross-language test vectors (§10 of
                               # the spec); run by both implementations
 gems/persona/                 # Ruby gem: seams, OIDC provider registry,
@@ -70,9 +69,9 @@ npm run docs:dev                                         # docs site (local)
 
 ## Where to start
 
-Read [doc/protocol.md](doc/protocol.md) — the normative spec covering both
-transports (header and cookie); language packages are adapters around it.
-For background, `doc/persona-module-handoff.md` is the original handoff and
-`doc/decisions/` records how its open points were settled.
+Read the spec in `docs/spec/` (run `npm run docs:dev`) — the normative source
+covering both transports (header and cookie); language packages are adapters
+around it. For background, `doc/persona-module-handoff.md` is the original
+handoff and `doc/decisions/` records how its open points were settled.
 
 Publishing target: the `uniba-commons` GitHub org (later; local-only for now).

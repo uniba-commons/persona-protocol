@@ -81,7 +81,7 @@ carrying the credential, chosen by where your app needs it:
   rendering and WebSocket handshakes. Fits server-rendered and hybrid stacks.
 
 Both profiles obey the same invariants; only the carriage differs. See
-[the protocol](/protocol) for the normative details.
+[the protocol](/spec/) for the normative details.
 
 ## Persistent by choice, disposable by default
 

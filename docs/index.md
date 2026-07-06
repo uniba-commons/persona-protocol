@@ -10,8 +10,8 @@ hero:
       text: What is persona-kit?
       link: /why
     - theme: alt
-      text: How it works
-      link: /how-it-works
+      text: Read the spec
+      link: /spec/
     - theme: alt
       text: Compare to hosted auth
       link: /comparison

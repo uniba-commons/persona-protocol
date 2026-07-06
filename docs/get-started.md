@@ -9,7 +9,7 @@ shows the *shape* of consuming persona-kit, not a stable install.
 
 ## What exists today
 
-- A normative [protocol specification](/protocol) covering both transports.
+- A normative [protocol specification](/spec/) covering both transports.
 - **Ruby gem** (`gems/persona`) — the seams an app injects, an OIDC provider
   registry, the account-link decision logic behind a storage port, and
   single-use claim codes.
@@ -100,4 +100,4 @@ const token = await sessions.sign({ sub: personaId, bid: browserId }, 60 * 60 * 
 
 The repository's `doc/` directory holds the design record: the protocol spec,
 the roadmap, the prior-art survey, the consumer profiles, and the decision log.
-Start with the [protocol](/protocol).
+Start with the [protocol](/spec/).
