@@ -39,8 +39,12 @@ export type PersonaCookies = {
   setSession(c: Context, data: SessionData): Promise<void>;
   readSession(c: Context): Promise<(SessionData & SessionPayload) | null>;
   clearSession(c: Context): void;
-  setPending<T extends Record<string, unknown>>(c: Context, data: T): Promise<void>;
-  readPending<T extends Record<string, unknown>>(c: Context): Promise<(T & SessionPayload) | null>;
+  // The pending payload is any object shape. The constraint is `object`, not
+  // `Record<string, unknown>`, so a declared `interface` (which has no implicit
+  // index signature and is therefore *not* assignable to `Record<string,
+  // unknown>`) is accepted just like a `type` alias. It is signed as JSON.
+  setPending<T extends object>(c: Context, data: T): Promise<void>;
+  readPending<T extends object>(c: Context): Promise<(T & SessionPayload) | null>;
   clearPending(c: Context): void;
 };
 
@@ -72,7 +76,7 @@ export const createPersonaCookies = (opts: PersonaCookieOptions): PersonaCookies
     },
 
     async setPending(c, data) {
-      const token = await codec.sign(data, pendingTtl);
+      const token = await codec.sign(data as Record<string, unknown>, pendingTtl);
       setCookie(c, pendingCookie, token, attrs(pendingTtl));
     },
     async readPending(c) {

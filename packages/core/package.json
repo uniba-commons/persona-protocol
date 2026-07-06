@@ -1,6 +1,9 @@
 {
   "name": "@uniba-commons/persona-core",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Portable anonymous identity: the agent_uid holder, the join handshake, and the persona-protocol wire-protocol names. Transport- and framework-agnostic.",
   "type": "module",
   "main": "dist/index.js",

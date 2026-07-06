@@ -39,7 +39,30 @@ Shared test vectors run against every language implementation
   rejected (tampered, expired, malformed). `verify_at` pins the clock in
   epoch seconds. Signing is covered by round-trip properties in each
   implementation, not by fixed bytes — token bytes depend on payload
-  serialization order, which the protocol does not constrain.
+  serialization order, which the protocol does not constrain. These vectors
+  therefore pin *verification within an implementation*, not cross-
+  implementation cookie interop: a cookie signed by one codec is not guaranteed
+  to verify under another until a canonical serialization is frozen (see C-1 in
+  the cookie-profile spec).
+
+## Which vectors bind you
+
+Vectors bind by transport **profile** and capability **level** — you conform
+against only the ones your implementation reaches. A header-profile, level-1
+consumer needs `wire-names.json` and nothing else.
+
+|                                     | Level 1 — anonymous identity + join      | Level 2 — + claims (account linking / claim codes) |
+| ----------------------------------- | ---------------------------------------- | -------------------------------------------------- |
+| **Header profile** (`X-Agent-Id`)   | `wire-names.json`                        | **+** `claim-decision.json`, `claim-code.json`     |
+| **Cookie profile** (session cookie) | `wire-names.json`, `session-cookie.json` | **+** `claim-decision.json`, `claim-code.json`     |
+
+- `wire-names.json` binds every implementation — the wire names are shared by
+  both profiles (`NOT_JOINED` rides the cookie profile too, C-4/H-4).
+- `session-cookie.json` binds only the cookie profile (C-1).
+- `claim-code.json` binds implementations that issue single-use claim codes to
+  restore or move a persona across browsers (P-7).
+- `claim-decision.json` binds implementations that graft a persona onto a
+  verified account — the §6 account-link decision table.
 
 ## Use (consumers)
 

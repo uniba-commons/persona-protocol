@@ -12,6 +12,7 @@ export {
 export {
   personaMiddleware,
   requireJoined,
+  requirePersona,
   type PersonaEnv,
   type PersonaMiddlewareOptions,
   type RequireJoinedOptions,

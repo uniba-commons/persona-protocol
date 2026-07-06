@@ -5,6 +5,14 @@ persona-protocol is under active development. The protocol and the reference
 libraries exist and are covered by cross-language conformance tests, but nothing
 is published to a package registry yet and the APIs may still move. This page
 shows the *shape* of consuming persona-protocol, not a stable install.
+
+**Consuming before publish:** the packages declare their inter-package
+dependencies as registry ranges (e.g. `@uniba-commons/persona-server-core:
+^0.1.0`), so installing a single package from a local tarball or `file:` dep
+hits an npm **E404** on its transitive `@uniba-commons/*` deps — the registry
+has nothing to resolve them from yet. Install all of them as top-level `file:`
+deps and npm dedupe satisfies the ranges from the local copies. This goes away
+once the packages are published.
 :::
 
 ## What exists today
@@ -118,6 +126,12 @@ app.use('*', requireJoined({ allow: (c) => c.req.path === '/join', redirectTo: '
 app.get('/', (c) => c.text('anyone can read this'))            // P-1: anonymous read
 app.post('/posts', (c) => create(c.get('persona')!))            // gated: needs a persona
 ```
+
+`requireJoined` gates writes and leaves reads anonymous (P-1). For routes that
+are owner-only *on read* — a settings or profile page an anonymous browser must
+not see even on GET — attach `requirePersona` instead, which gates every method.
+Which routes are private is your policy; the adapter only enforces the gate you
+attach.
 
 ## Adopting it
 

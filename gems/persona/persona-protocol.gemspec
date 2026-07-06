@@ -1,7 +1,12 @@
 require_relative 'lib/persona/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'persona'
+  # Distribution name: the flat `persona` is taken on RubyGems by an unrelated,
+  # abandoned gem, so we publish under the differentiated `persona-protocol`
+  # (matching the repo and the npm scope story). The require path and namespace
+  # stay `require 'persona'` / `Persona::` — only the install name changes, so a
+  # consumer's existing code keeps working unchanged.
+  spec.name = 'persona-protocol'
   spec.version = Persona::VERSION
   spec.authors = ['Uniba Inc.']
   spec.email = ['haruma@uniba.jp']

@@ -4,6 +4,7 @@ import {
   createPersonaCookies,
   personaMiddleware,
   requireJoined,
+  requirePersona,
   type PersonaEnv,
 } from '../src/index.js';
 
@@ -131,15 +132,24 @@ describe('persona-hono adapter', () => {
   });
 });
 
+// A declared `interface` (no implicit index signature) exercises the loosened
+// setPending/readPending constraint: under `Record<string, unknown>` these
+// would not compile.
+interface Proposal {
+  username: string;
+  agentKey: string;
+}
+
 describe('persona-hono pending-join cookie', () => {
   it('round-trips a proposal and clears it', async () => {
     const cookies = createPersonaCookies({ secret: SECRET, secure: false });
     const app = new Hono();
     app.post('/propose', async (c) => {
-      await cookies.setPending(c, { username: 'yamane42', agentKey: 'abc' });
+      const proposal: Proposal = { username: 'yamane42', agentKey: 'abc' };
+      await cookies.setPending(c, proposal);
       return c.text('proposed');
     });
-    app.get('/pending', async (c) => c.json((await cookies.readPending<{ username: string }>(c)) ?? {}));
+    app.get('/pending', async (c) => c.json((await cookies.readPending<Proposal>(c)) ?? {}));
 
     const proposed = await app.request('/propose', { method: 'POST' });
     const cookie = (proposed.headers.get('set-cookie') ?? '').split(';')[0]!;
@@ -148,5 +158,51 @@ describe('persona-hono pending-join cookie', () => {
     const read = await app.request('/pending', { headers: { cookie } });
     const body = (await read.json()) as { username?: string };
     expect(body.username).toBe('yamane42');
+  });
+});
+
+// requirePersona is the read-gate requireJoined deliberately is not: it gates
+// GETs too, for routes that are owner-only by design.
+describe('persona-hono requirePersona read-gate', () => {
+  function buildReadGated() {
+    const cookies = createPersonaCookies({ secret: SECRET, secure: false });
+    const app = new Hono<PersonaEnv<User>>();
+    app.use('*', personaMiddleware({ cookies, resolvePersona: (sub) => USERS[sub] ?? null }));
+    // '/' stays public; '/settings' is owner-only even on read.
+    app.get('/', (c) => c.text('anyone can read'));
+    app.use('/settings', requirePersona({ redirectTo: '/welcome' }));
+    app.get('/settings', (c) => c.json({ ok: true, id: c.get('persona')?.id ?? null }));
+    app.post('/join', async (c) => {
+      await cookies.setSession(c, { sub: 'persona-1' });
+      return c.json({ joined: true });
+    });
+    return app;
+  }
+
+  it('leaves ungated reads public (P-1)', async () => {
+    const res = await buildReadGated().request('/');
+    expect(res.status).toBe(200);
+  });
+
+  it('redirects an anonymous full-page GET on an owner-only route', async () => {
+    const res = await buildReadGated().request('/settings', { headers: { accept: 'text/html' } });
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toBe('/welcome');
+  });
+
+  it('returns NOT_JOINED for an anonymous scripted GET on an owner-only route', async () => {
+    const res = await buildReadGated().request('/settings');
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ code: 'NOT_JOINED' });
+  });
+
+  it('serves the owner-only route once joined', async () => {
+    const app = buildReadGated();
+    const cookies = jar();
+    cookies.capture(await app.request('/join', { method: 'POST' }));
+
+    const res = await app.request('/settings', { headers: cookies.header() });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, id: 'persona-1' });
   });
 });

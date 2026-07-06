@@ -71,6 +71,10 @@ module Persona
     attr_accessor :guest_nickname_generator
 
     # Builds the placeholder email/identifier persisted on a new guest user.
+    # It MUST NOT be derived from the agent_uid or the session credential: this
+    # value is exposable (a settings page, a profile view echoes it), so
+    # deriving it would leak the credential back (P-3). The default draws from
+    # independent randomness for exactly this reason.
     attr_accessor :guest_email_factory
 
     # Registered OIDC providers by name (see Persona::Oidc for the provider

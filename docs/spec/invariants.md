@@ -22,6 +22,13 @@ URLs, HTML, response bodies, or logs. The only exception is the single moment an
 anonymous browser acquires a persona ([H-3](/spec/header-profile#h-3) /
 [C-3](/spec/cookie-profile#c-3)).
 
+A placeholder identifier persisted for a new persona — a placeholder email, a
+generated display handle — is exposable, and therefore **MUST NOT** be derived
+from the credential. Deriving one (e.g. `agent-<agent_uid>@guest.local`) leaks
+the credential through a field P-3 otherwise lets you show, and any later
+endpoint that echoes it (a profile view, an account settings page) becomes a
+credential-echo path. Generate the placeholder from independent randomness.
+
 ### P-4 — The server does not issue identity {#p-4}
 
 A persona is self-asserted until verified. In the header profile the browser

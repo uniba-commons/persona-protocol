@@ -14,6 +14,17 @@ over a payload containing at least the persona reference and an expiry.
 Verification **MUST** use a timing-safe comparison and **MUST** reject expired
 payloads.
 
+**Interop is scoped to a single implementation.** A cookie signed by one codec
+verifies under that same codec (same secret) — so a drop-in cutover to a
+conforming library keeps existing sessions valid without a forced re-login. It
+is **not** a conformance guarantee that a cookie signed by one implementation
+verifies under a *different* one: the protocol fixes the MAC over a payload but
+not a canonical byte serialization of that payload, so two conforming codecs
+**MAY** produce different bytes for the same fields. Cross-implementation cookie
+interop (e.g. a Ruby-signed cookie read by a TypeScript codec) is therefore out
+of scope until a canonical serialization is frozen here — see
+[Conformance](/spec/conformance).
+
 ### C-2 — Cookie attributes {#c-2}
 
 The cookie **MUST** be `HttpOnly`, **MUST** be `Secure` when served over https,

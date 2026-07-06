@@ -1,6 +1,9 @@
 {
   "name": "@uniba-commons/persona-apollo",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Apollo Client transport adapter for persona-protocol: the X-Agent-Id header link and the NOT_JOINED join-retry link.",
   "type": "module",
   "main": "dist/index.js",

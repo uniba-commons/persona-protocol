@@ -1,6 +1,9 @@
 {
   "name": "@uniba-commons/persona-server-core",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Server-side core for persona-protocol's cookie profile: signed session tokens, single-use claim codes, and the claim decision table. Web Crypto only — Node 18+, edge, workers.",
   "type": "module",
   "main": "dist/index.js",
