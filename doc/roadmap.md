@@ -29,16 +29,25 @@ persona-kit の約束: **consumer はモジュールを更新するだけで新�
 
 ## Phase 2 — 検証済み identity(IdP 連携の本実装)
 
-現行の stub provider と同じ契約(`name` / `authorize_url(state:)` /
-`verify(params)`)で、本物の provider を kit に同梱して配る:
+provider 契約(`name` / `authorize` / `verify`)のまま、本物の provider を
+kit に同梱して配る:
 
-- **OIDC 汎用 provider**(gem / TS server-core): authorization code + PKCE、
-  JWKS 取得と id_token 検証(iss / aud / exp / sub、デプロイ固有 claim の
-  検査フック)。組織 IdP(例: uniba/auth)はこの構成で登録するだけ
-- **Google provider**: 汎用 OIDC provider の preset(discovery URL、scope、
-  検証既定)として提供
-- consumer 側の獲得手順が「バージョン更新 + `register_oidc_provider` 1 行 +
-  リンク UI」で済むことを、実在 consumer で実証する
+- ✅ **OIDC 汎用 verifier**(TS server-core `createOidcVerifierProvider`):
+  authorization code + PKCE、discovery、JWKS 取得 + 署名検証(RS256 / ES256 /
+  EdDSA、鍵ローテ)、id_token 検証(iss / aud / exp / nonce / sub + デプロイ
+  固有 claim: `hd` / email ドメイン)。**自己署名 JWKS の契約テストで検証済み**
+  (uniba/auth の live endpoint に依存しない)
+- ✅ **uniba/auth preset**(`unibaAuthProvider`): 汎用 verifier に name /
+  scope / `hd=uniba.jp` / email ドメイン既定を乗せた薄い設定。uniba/auth は
+  未実装(設計ドキュメント段階)なので issuer は consumer 指定、token claim の
+  ドメイン検査は暫定(auth の token spec 確定時に見直す)
+- **Ruby 側の実 verifier**(gem): 同じ provider 契約の Ruby 実装。header
+  profile の consumer(another-sgms)向け。TS 契約の `authorize`/stash 変更を
+  Ruby にも反映して再同期する
+- **Google provider preset**: 汎用 verifier の preset として後日提供(uniba/auth
+  を優先したため後回し)
+- consumer 側の獲得手順が「バージョン更新 + provider 登録 1 行 + リンク UI」で
+  済むことを、実在 consumer で実証する
 
 ## Phase 3 — 先の構想(順不同)
 

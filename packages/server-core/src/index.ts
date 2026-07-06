@@ -23,8 +23,24 @@ export {
   createProviderRegistry,
   type Identity,
   type OidcProvider,
+  type AuthorizeStart,
   type ProviderRegistry,
 } from './oidc.js';
+export {
+  createOidcVerifierProvider,
+  unibaAuthProvider,
+  type OidcVerifierConfig,
+  type UnibaAuthConfig,
+} from './oidc_verifier.js';
+export {
+  decodeJwt,
+  selectJwk,
+  verifyJwtSignature,
+  supportedAlgs,
+  type Jwk,
+  type Jwks,
+  type DecodedJwt,
+} from './jwt.js';
 export {
   createLinkStore,
   generateLinkToken,

@@ -19,8 +19,9 @@ export const beginAccountLink = async (opts: {
 }): Promise<{ state: string; authorizeUrl: string }> => {
   const provider = opts.registry.get(opts.providerName); // throws if unregistered
   const state = opts.linkStore.generateToken();
-  await opts.linkStore.putPending(state, { provider: opts.providerName, binding: opts.binding });
-  return { state, authorizeUrl: provider.authorizeUrl(state) };
+  const { url, stash } = await provider.authorize(state);
+  await opts.linkStore.putPending(state, { provider: opts.providerName, binding: opts.binding, stash });
+  return { state, authorizeUrl: url };
 };
 
 // Step 2 — callback. Consumes the state once, verifies the IdP outcome through
@@ -37,7 +38,7 @@ export const handleOidcCallback = async (opts: {
   if (!pending) return null;
 
   const provider = opts.registry.get(pending.provider);
-  const identity = await provider.verify(opts.params);
+  const identity = await provider.verify(opts.params, pending.stash);
   if (!identity) return null;
 
   const linkToken = opts.linkStore.generateToken();

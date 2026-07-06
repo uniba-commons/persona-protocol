@@ -40,7 +40,7 @@ describe('OIDC provider registry', () => {
 
   it('escapes the state into the stub authorize URL', () => {
     const p = new StubProvider();
-    expect(p.authorizeUrl('a b&c')).toBe('/auth/oidc/start?state=a%20b%26c');
+    expect(p.authorize('a b&c').url).toBe('/auth/oidc/start?state=a%20b%26c');
   });
 
   it('verifies a subject and rejects a missing one', () => {

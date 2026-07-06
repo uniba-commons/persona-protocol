@@ -17,7 +17,9 @@ export interface KVStore {
 // `binding` is an opaque token tying the flow to the initiating browser — the
 // agent_uid in the header profile, or a nonce the adapter sets in a cookie in
 // the cookie profile. Optional; when present it is checked at complete (P-16a).
-export type PendingData = { provider: string; binding?: string };
+// `stash` carries the provider's per-flow secrets (PKCE code_verifier, nonce)
+// from authorize to the callback's verify.
+export type PendingData = { provider: string; binding?: string; stash?: Record<string, string> };
 export type ResultData = { provider: string; subject: string; binding?: string };
 
 export interface LinkStore {

@@ -15,8 +15,9 @@ shows the *shape* of consuming persona-kit, not a stable install.
   single-use claim codes.
 - **TypeScript packages** — `@uniba-commons/persona-core` (the agent-id holder,
   join handshake, and wire-protocol names), `@uniba-commons/persona-server-core`
-  (cookie-profile session tokens, claim codes, the claim decision table, and the
-  OIDC provider registry + link-store round-trip),
+  (cookie-profile session tokens, claim codes, the claim decision table, the
+  OIDC provider registry + link-store round-trip, and a production OIDC verifier
+  with a uniba/auth preset),
   `@uniba-commons/persona-hono` (the cookie-profile Hono adapter: session and
   pending cookies, persona-resolution middleware, and `NOT_JOINED` gating),
   plus `@uniba-commons/persona-apollo` and `@uniba-commons/persona-cable`

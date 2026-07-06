@@ -8,15 +8,24 @@
 // an account binding.
 export type Identity = { provider: string; subject: string };
 
+// The authorize URL plus any per-flow secrets (PKCE code_verifier, nonce) that
+// must be stashed with the state and handed back to verify() on the callback.
+// The stub needs no stash; a real OIDC code+PKCE flow does.
+export type AuthorizeStart = { url: string; stash?: Record<string, string> };
+
 export interface OidcProvider {
   // Stable identifier stored on account bindings ('google', 'my-org-idp', …).
   readonly name: string;
-  // Where the begin step sends the browser to authenticate. Only the opaque
-  // state may ride the URL (P-14).
-  authorizeUrl(state: string): string;
+  // Where the begin step sends the browser to authenticate, plus the per-flow
+  // secrets to stash. Only the opaque state may ride the URL (P-14).
+  authorize(state: string): AuthorizeStart | Promise<AuthorizeStart>;
   // Callback verification. Real providers exchange the code and validate the
-  // token against the IdP's published keys; may be async.
-  verify(params: Record<string, unknown>): Identity | null | Promise<Identity | null>;
+  // token against the IdP's published keys, using the stashed secrets; may be
+  // async.
+  verify(
+    params: Record<string, unknown>,
+    stash?: Record<string, string>,
+  ): Identity | null | Promise<Identity | null>;
 }
 
 // Local / development stand-in for a real provider. Its authorize URL points at
@@ -32,8 +41,8 @@ export class StubProvider implements OidcProvider {
     this.authorizePath = opts.authorizePath ?? '/auth/oidc/start';
   }
 
-  authorizeUrl(state: string): string {
-    return `${this.authorizePath}?state=${encodeURIComponent(state)}`;
+  authorize(state: string): AuthorizeStart {
+    return { url: `${this.authorizePath}?state=${encodeURIComponent(state)}` };
   }
 
   verify(params: Record<string, unknown>): Identity | null {
