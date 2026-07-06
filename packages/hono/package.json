@@ -1,0 +1,30 @@
+{
+  "name": "@uniba-commons/persona-hono",
+  "version": "0.1.0",
+  "description": "Hono adapter for persona-kit's cookie profile: session and pending-join cookies, the persona-resolution middleware, and NOT_JOINED write gating, on top of persona-server-core.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@uniba-commons/persona-server-core": "*"
+  },
+  "peerDependencies": {
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "hono": "^4.6.0"
+  }
+}

@@ -18,8 +18,11 @@ persona-kit の約束: **consumer はモジュールを更新するだけで新�
 - ✅ TS `packages/server-core`: cookie profile のサーバ側共通部
   (session の sign / verify、claim code、claim 決定表)。
   hono / next など framework adapter はこの上の薄い層にする
+- ✅ `packages/hono` adapter(cookie profile の framework 結線: session /
+  pending cookie、persona 解決 middleware、`NOT_JOINED` gating)。
+  my-local-3-hono の `src/identity.ts` の identity/session/claim 中核を置換
+  (nickname / avatar 等の presentation helper は app 側に残る)
 - `packages/server-core` に link store 契約(OIDC round-trip 用)を追加
-- `packages/hono` adapter(my-local-3-hono の `src/identity.ts` を置換)
 - another-sgms / my-local-3-hono の consumer 化 PR(同時着地、順序なし)
 
 ## Phase 2 — 検証済み identity(IdP 連携の本実装)

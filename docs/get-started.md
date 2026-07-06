@@ -16,8 +16,10 @@ shows the *shape* of consuming persona-kit, not a stable install.
 - **TypeScript packages** — `@uniba-commons/persona-core` (the agent-id holder,
   join handshake, and wire-protocol names), `@uniba-commons/persona-server-core`
   (cookie-profile session tokens, claim codes, and the claim decision table),
+  `@uniba-commons/persona-hono` (the cookie-profile Hono adapter: session and
+  pending cookies, persona-resolution middleware, and `NOT_JOINED` gating),
   plus `@uniba-commons/persona-apollo` and `@uniba-commons/persona-cable`
-  transport adapters.
+  header-profile transport adapters.
 - Shared **conformance fixtures** that both language implementations run, so the
   Ruby and TypeScript sides can't diverge.
 
@@ -94,6 +96,25 @@ import { createSessionCodec, performAccountLink } from '@uniba-commons/persona-s
 
 const sessions = createSessionCodec({ secret: process.env.SESSION_SECRET! })
 const token = await sessions.sign({ sub: personaId, bid: browserId }, 60 * 60 * 24 * 365)
+```
+
+On Hono, `@uniba-commons/persona-hono` wires that into the framework — the
+session and pending-join cookies, a middleware that resolves the current persona
+onto `c.var.persona`, and the `NOT_JOINED` write gate that keeps reads anonymous
+while guarding writes:
+
+```ts
+import { Hono } from 'hono'
+import { createPersonaCookies, personaMiddleware, requireJoined, type PersonaEnv } from '@uniba-commons/persona-hono'
+
+const cookies = createPersonaCookies({ secret: process.env.SESSION_SECRET! })
+const app = new Hono<PersonaEnv<User>>()
+
+app.use('*', personaMiddleware({ cookies, resolvePersona: (sub) => findUser(sub) }))
+app.use('*', requireJoined({ allow: (c) => c.req.path === '/join', redirectTo: '/welcome' }))
+
+app.get('/', (c) => c.text('anyone can read this'))            // P-1: anonymous read
+app.post('/posts', (c) => create(c.get('persona')!))            // gated: needs a persona
 ```
 
 ## Following along

@@ -53,6 +53,8 @@ packages/core/                # TS: agent-id holder, join handshake,
                               # wire-protocol names; no dependencies
 packages/server-core/         # TS: cookie-profile server core — session
                               # tokens, claim codes, claim decision table
+packages/hono/                # TS: Hono adapter (cookie profile) — session /
+                              # pending cookies, persona middleware, gating
 packages/apollo/              # TS: Apollo links (X-Agent-Id, NOT_JOINED retry)
 packages/cable/               # TS: ActionCable agent_id query param
 examples/                     # how a Rails consumer wires the seams and
