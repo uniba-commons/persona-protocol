@@ -19,6 +19,6 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@uniba-commons/persona-core": "*"
+    "@uniba-commons/persona-core": "^0.1.0"
   }
 }

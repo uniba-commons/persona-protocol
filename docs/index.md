@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: persona-protocol
-  text: Identity that starts anonymous and travels with the browser
+  text: Identity that starts anonymous and stays the user's
   tagline: Start with no login. Carry a per-browser persona. Graft it onto a verified account only when it earns its place — and own every byte, because it's a protocol you run, not a service you rent.
   actions:
     - theme: brand

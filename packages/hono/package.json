@@ -19,7 +19,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@uniba-commons/persona-server-core": "*"
+    "@uniba-commons/persona-server-core": "^0.1.0"
   },
   "peerDependencies": {
     "hono": "^4.0.0"

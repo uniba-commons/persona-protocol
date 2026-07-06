@@ -1,0 +1,16 @@
+{
+  "name": "@uniba-commons/persona-conformance",
+  "version": "0.1.0",
+  "description": "Cross-language conformance vectors for persona-protocol: frozen wire-format and claim-decision fixtures every implementation must pass. Data only — no runtime code.",
+  "files": [
+    "*.json",
+    "README.md"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./wire-names.json": "./wire-names.json",
+    "./session-cookie.json": "./session-cookie.json",
+    "./claim-code.json": "./claim-code.json",
+    "./claim-decision.json": "./claim-decision.json"
+  }
+}

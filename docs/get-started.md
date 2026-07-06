@@ -119,6 +119,24 @@ app.get('/', (c) => c.text('anyone can read this'))            // P-1: anonymous
 app.post('/posts', (c) => create(c.get('persona')!))            // gated: needs a persona
 ```
 
+## Adopting it
+
+persona-protocol is a contract first, so how you take it up depends on what you
+already have.
+
+- **You already have persona/identity code.** Don't import the core to replace
+  it — swapping identical logic for a dependency is pure churn. Adopt the
+  [conformance vectors](/spec/conformance) as tests against *your own*
+  implementation instead: they freeze the wire format so your codec can't drift
+  from another implementation's. It is the cheapest, highest-value first step,
+  and it adds no runtime dependency.
+- **You need verified accounts or cross-device continuity.** Climb the ladder
+  only when a feature earns it — a durable browser key, then a verified account
+  via OIDC, then linking across apps. Each step is opt-in; reading stays
+  anonymous and the browser stays the entity throughout.
+- **You depend on the code.** Pin to a release tag — the first is `v0.1.0`. A
+  tag is what freezes the wire format and invariants you are conforming to.
+
 ## Following along
 
 The repository's `doc/` directory holds the design record: the protocol spec,

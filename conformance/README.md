@@ -1,5 +1,9 @@
 # Conformance fixtures
 
+Published as **`@uniba-commons/persona-conformance`** — the frozen, versioned
+vectors every persona-protocol implementation must pass, so independent codecs
+cannot drift from the wire contract. Data only; no runtime code.
+
 Shared test vectors run against every language implementation
 (doc/protocol.md §10). Runners live with each implementation's test suite:
 
@@ -36,6 +40,17 @@ Shared test vectors run against every language implementation
   epoch seconds. Signing is covered by round-trip properties in each
   implementation, not by fixed bytes — token bytes depend on payload
   serialization order, which the protocol does not constrain.
+
+## Use (consumers)
+
+Adopt these as tests against *your own* implementation — you need not depend on
+the reference libraries to conform. Pin a version; the vectors are what a
+release freezes.
+
+```ts
+import cases from '@uniba-commons/persona-conformance/claim-decision.json' with { type: 'json' }
+// drive your account-link logic through each case and assert the expected outcome
+```
 
 ## Adding a vector
 
