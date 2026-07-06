@@ -6,6 +6,11 @@
 # settings up automatically. Clean URLs (VitePress cleanUrls) are served by
 # Netlify's built-in pretty-URL resolution, so no redirect rules are needed.
 [build]
+  # Pin the build to the repository root. This monorepo has several package.json
+  # files, and Netlify's import auto-detection may otherwise set the base to one
+  # of the packages/* directories — which breaks both `npm install` (it would
+  # miss the root devDependencies, incl. VitePress) and the build command.
+  base = "."
   command = "npm run docs:build"
   publish = "docs/.vitepress/dist"
 
