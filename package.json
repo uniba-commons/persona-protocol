@@ -7,10 +7,14 @@
   "scripts": {
     "build": "npm run build -w @uniba-commons/persona-core && npm run build -w @uniba-commons/persona-server-core -w @uniba-commons/persona-apollo -w @uniba-commons/persona-cable",
     "test": "npm run build && vitest run",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "clean": "rm -rf packages/*/dist"
   },
   "devDependencies": {
     "typescript": "^5.5.0",
+    "vitepress": "^1.6.4",
     "vitest": "^3.0.0"
   }
 }

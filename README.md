@@ -43,6 +43,8 @@ doc/
                               # design constraints, open questions, plan (ja)
   auth-removal-plan.md        # design history, copied from another-sgms (ja)
   decisions/                  # decision records (ja)
+docs/                         # VitePress site: the outward-facing self-intro
+                              # (Why / How it works / Comparison / Get started, en)
 conformance/                  # shared cross-language test vectors (§10 of
                               # the spec); run by both implementations
 gems/persona/                 # Ruby gem: seams, OIDC provider registry,
@@ -63,6 +65,7 @@ Build & test (both suites include the shared conformance vectors):
 ```
 cd gems/persona && bundle install && bundle exec rspec   # Ruby
 npm install && npm test                                  # TypeScript
+npm run docs:dev                                         # docs site (local)
 ```
 
 ## Where to start
