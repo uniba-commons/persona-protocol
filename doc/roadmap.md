@@ -22,7 +22,9 @@ persona-kit の約束: **consumer はモジュールを更新するだけで新�
   pending cookie、persona 解決 middleware、`NOT_JOINED` gating)。
   my-local-3-hono の `src/identity.ts` の identity/session/claim 中核を置換
   (nickname / avatar 等の presentation helper は app 側に残る)
-- `packages/server-core` に link store 契約(OIDC round-trip 用)を追加
+- ✅ `packages/server-core` に OIDC link-store 契約 + round-trip
+  オーケストレーション(provider registry / `KVStore` port /
+  begin・callback・complete)を追加。header / cookie 両 profile 非依存
 - another-sgms / my-local-3-hono の consumer 化 PR(同時着地、順序なし)
 
 ## Phase 2 — 検証済み identity(IdP 連携の本実装)

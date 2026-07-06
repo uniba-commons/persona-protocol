@@ -18,3 +18,23 @@ export {
   type AccountLinkResult,
   type ClaimIdentity,
 } from './account_link.js';
+export {
+  StubProvider,
+  createProviderRegistry,
+  type Identity,
+  type OidcProvider,
+  type ProviderRegistry,
+} from './oidc.js';
+export {
+  createLinkStore,
+  generateLinkToken,
+  type KVStore,
+  type LinkStore,
+  type PendingData,
+  type ResultData,
+} from './link_store.js';
+export {
+  beginAccountLink,
+  handleOidcCallback,
+  completeAccountLink,
+} from './oidc_flow.js';

@@ -52,7 +52,8 @@ gems/persona/                 # Ruby gem: seams, OIDC provider registry,
 packages/core/                # TS: agent-id holder, join handshake,
                               # wire-protocol names; no dependencies
 packages/server-core/         # TS: cookie-profile server core — session
-                              # tokens, claim codes, claim decision table
+                              # tokens, claim codes, claim decision table,
+                              # OIDC provider registry + link-store round-trip
 packages/hono/                # TS: Hono adapter (cookie profile) — session /
                               # pending cookies, persona middleware, gating
 packages/apollo/              # TS: Apollo links (X-Agent-Id, NOT_JOINED retry)
