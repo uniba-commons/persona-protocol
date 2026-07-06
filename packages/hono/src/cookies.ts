@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { createSessionCodec, type SessionPayload } from '@uniba-commons/persona-server-core';
 
-// Binds persona-kit's cookie-profile credential to Hono. Two signed cookies:
+// Binds persona-protocol's cookie-profile credential to Hono. Two signed cookies:
 //
 //   session  — the credential itself (C-1/C-2/C-3): a reference to the persona,
 //              issued only at acquisition and read on every request.

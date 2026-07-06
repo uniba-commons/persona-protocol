@@ -1,12 +1,12 @@
-# The persona-kit protocol
+# The persona-protocol specification
 
 <div class="spec-version">Version 0.1 · draft</div>
 
-This is the whole of persona-kit. The libraries are adapters around what is
+This is the whole of persona-protocol. The libraries are adapters around what is
 written here; where an implementation and this document disagree, **this
 document wins**.
 
-persona-kit specifies **portable anonymous identity** on the web: a visitor
+persona-protocol specifies **portable anonymous identity** on the web: a visitor
 starts using an application with no login, acquires a per-browser persona the
 moment they choose to participate, carries that persona across browsers, and
 optionally grafts it onto an identity verified by an external provider — without

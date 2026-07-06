@@ -1,7 +1,7 @@
 {
   "name": "@uniba-commons/persona-cable",
   "version": "0.1.0",
-  "description": "ActionCable transport adapter for persona-kit: appends the agent_id query param to the cable URL.",
+  "description": "ActionCable transport adapter for persona-protocol: appends the agent_id query param to the cable URL.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -2,7 +2,7 @@ import { ApolloLink, Observable, type Operation, fromPromise } from '@apollo/cli
 import { onError } from '@apollo/client/link/error';
 import { AGENT_ID_HEADER, NOT_JOINED_CODE, getAgentId, requestJoin } from '@uniba-commons/persona-core';
 
-// Apollo transport adapter for persona-kit: carries the agent_uid as the
+// Apollo transport adapter for persona-protocol: carries the agent_uid as the
 // X-Agent-Id header and drives the join handshake off the NOT_JOINED
 // GraphQL extension code. The names themselves live in persona-core —
 // this package only owns their GraphQL/Apollo carriage.

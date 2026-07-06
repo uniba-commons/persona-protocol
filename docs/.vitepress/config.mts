@@ -6,7 +6,7 @@ import { defineConfig } from 'vitepress'
 // repository's doc/ directory and is intentionally not part of this site.
 export default defineConfig({
   lang: 'en-US',
-  title: 'persona-kit',
+  title: 'persona-protocol',
   description: 'Portable anonymous identity for the web — a protocol you run, not a service you rent.',
   cleanUrls: true,
   lastUpdated: true,
@@ -43,7 +43,7 @@ export default defineConfig({
         {
           text: 'Introduction',
           items: [
-            { text: 'What is persona-kit?', link: '/why' },
+            { text: 'What is persona-protocol?', link: '/why' },
             { text: 'How it works', link: '/how-it-works' },
             { text: 'Compared to hosted auth', link: '/comparison' },
           ],
@@ -59,7 +59,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/uniba-commons/persona-kit' },
+      { icon: 'github', link: 'https://github.com/uniba-commons/persona-protocol' },
     ],
 
     footer: {

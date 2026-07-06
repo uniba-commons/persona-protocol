@@ -1,7 +1,6 @@
-# What is persona-kit?
+# What is persona-protocol?
 
-persona-kit is a protocol — with Ruby and TypeScript reference libraries — for
-**identity that starts anonymous and travels with the browser**. A visitor uses
+**persona-protocol** specifies **identity that starts anonymous and travels with the browser** — with Ruby and TypeScript reference libraries. A visitor uses
 your app with no login, picks up a persona the moment they first contribute, and
 can later attach a verified account to it. You run all of it yourself; there is
 no service in the middle.
@@ -18,7 +17,7 @@ Most apps pick one of two unhappy extremes:
   next browser, or the next cache clear. There is no way to *become* someone
   without starting over.
 
-persona-kit is the path between them: **anonymous until it matters, portable
+persona-protocol is the path between them: **anonymous until it matters, portable
 when it does, verifiable if you want it.**
 
 ## Four things that make it different
@@ -26,7 +25,7 @@ when it does, verifiable if you want it.**
 ### 1. Anonymous even longer than you'd expect
 
 Hosted anonymous-auth SDKs mint an anonymous identity the moment the app loads.
-persona-kit does not: **reading requires no identity at all**, and a persona is
+persona-protocol does not: **reading requires no identity at all**, and a persona is
 created only on the first *write*. The visitor who browses and leaves was never
 an "anonymous user #48213" — they were nobody, by design.
 
@@ -45,25 +44,25 @@ person joined on their laptop and their phone, then linked both to one Google
 account. Every hosted auth system we surveyed hands this moment back to you:
 Firebase fails the link and tells you to "handle merging"; Auth0 discards the
 secondary account's data; PlayFab overwrites one profile and can orphan the
-other. persona-kit specifies it instead: a **merge preview** first, changing
+other. persona-protocol specifies it instead: a **merge preview** first, changing
 nothing, then a **confirm**. Data is never silently lost.
 
 ### 4. It is a protocol, not a platform
 
 Firebase, Supabase, Auth0, and PlayFab are services: they hold your identity
-data and charge by active user. persona-kit is a **spec plus libraries you
+data and charge by active user. persona-protocol is a **spec plus libraries you
 embed**. Identity records live in *your* database; the OIDC provider is *your*
 choice; the wire format is documented so a second implementation can't drift.
 Nothing phones home.
 
-## What persona-kit is *not*
+## What persona-protocol is *not*
 
-- **Not a hosted service.** There is no persona-kit account, dashboard, or
+- **Not a hosted service.** There is no persona-protocol account, dashboard, or
   endpoint. You wire the libraries into your own backend.
 - **Not a full IdP.** It does the anonymous-first half and the account-*linking*
   half; the actual credential verification is delegated to a real OIDC provider
   you register.
-- **Not finished.** persona-kit is pre-v0: the protocol and the reference
+- **Not finished.** persona-protocol is pre-v0: the protocol and the reference
   libraries are being built and proven against real consumers in the open. See
   [Get started](/get-started) for what exists today.
 
@@ -73,7 +72,7 @@ Apps where the *content* should be open to everyone but *contributing* should
 carry a stable-ish identity, and where you would rather own that identity layer
 than rent it: community maps, collaborative documents, forums, guestbooks,
 event tools, local-first apps with a server. If "make people sign up first"
-feels like the wrong shape for your product, persona-kit is the other shape.
+feels like the wrong shape for your product, persona-protocol is the other shape.
 
 Next: [how it works](/how-it-works), or [how it compares](/comparison) to the
 hosted options.

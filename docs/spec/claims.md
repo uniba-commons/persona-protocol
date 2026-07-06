@@ -1,7 +1,7 @@
 # Claims — taking over a persona
 
 This is the center of the spec. Redeeming a recovery code, importing a migration
-key, linking an OIDC account — persona-kit treats all three as **one uniform
+key, linking an OIDC account — persona-protocol treats all three as **one uniform
 event**:
 
 > A subject — a claim-code digest, or a provider-verified `(provider, subject)`

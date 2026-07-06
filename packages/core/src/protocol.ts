@@ -1,4 +1,4 @@
-// The wire-protocol names shared by every persona-kit transport. These are
+// The wire-protocol names shared by every persona-protocol transport. These are
 // protocol, not implementation: the Ruby gem declares the same values, and
 // doc/protocol.md (the source of truth once written) must list them.
 

@@ -1,4 +1,4 @@
-// @uniba-commons/persona-hono — the Hono adapter for persona-kit's cookie
+// @uniba-commons/persona-hono — the Hono adapter for persona-protocol's cookie
 // profile. It binds persona-server-core's session codec, claim codes, and
 // claim decision table to Hono: signed session and pending-join cookies, a
 // per-request persona-resolution middleware, and NOT_JOINED write gating.

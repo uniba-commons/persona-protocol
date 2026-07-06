@@ -1,6 +1,6 @@
 # How it works
 
-persona-kit has a small vocabulary. Learn these six words and the whole model
+persona-protocol has a small vocabulary. Learn these six words and the whole model
 falls into place.
 
 ## The vocabulary
@@ -63,7 +63,7 @@ tokens do.
 ### Merge: the two-phase conflict
 
 The interesting case is when the browser is already a *different* persona than
-the one holding the target identity. persona-kit does not pick a winner
+the one holding the target identity. persona-protocol does not pick a winner
 silently. It returns a **merge preview** — a description of what would move —
 and changes nothing. Only when the user confirms does the acting persona fold
 into the holder, carrying its bindings and its data. This preview-then-confirm
@@ -71,7 +71,7 @@ rule is a protocol guarantee, not an application courtesy.
 
 ## Two transports, one model
 
-The model above is transport-agnostic. persona-kit ships two **profiles** for
+The model above is transport-agnostic. persona-protocol ships two **profiles** for
 carrying the credential, chosen by where your app needs it:
 
 - **Header profile** — the browser holds the `agent_uid` and sends it in an

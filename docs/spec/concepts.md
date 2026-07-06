@@ -1,6 +1,6 @@
 # Concepts and terminology
 
-persona-kit has a small vocabulary. Six words carry the entire model.
+persona-protocol has a small vocabulary. Six words carry the entire model.
 
 ## Persona
 

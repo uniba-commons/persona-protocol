@@ -1,4 +1,4 @@
-# Netlify configuration for the persona-kit documentation site.
+# Netlify configuration for the persona-protocol documentation site.
 #
 # The site is the VitePress app under docs/; the rest of the repository (the
 # gem, the TypeScript packages, the internal design notes) is not part of the

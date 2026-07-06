@@ -44,7 +44,7 @@ nothing may change without an explicit confirmation: the first response **MUST**
 be a preview, computed without side effects, and the mutation **MUST** only
 happen on a confirmed second request.
 
-This rule is the reason persona-kit exists as a protocol rather than a
+This rule is the reason persona-protocol exists as a protocol rather than a
 convention — see [Claims](/spec/claims) for the table it governs.
 
 ### P-7 — Claim codes are single-use and never stored in the clear {#p-7}

@@ -1,5 +1,5 @@
 {
-  "name": "persona-kit",
+  "name": "persona-protocol",
   "private": true,
   "workspaces": [
     "packages/*"

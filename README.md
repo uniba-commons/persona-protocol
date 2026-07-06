@@ -1,4 +1,4 @@
-# persona-kit
+# persona-protocol
 
 Portable anonymous identity for the web: start using an app with **no login**,
 carry a per-browser persona, and optionally graft it onto a verified account
@@ -15,7 +15,7 @@ are targeted from day one, on equal footing:
   identity carried by an HMAC-signed session cookie, with the agent id as an
   exportable "share key"
 
-another-sgms is the origin, **not** the reference implementation. The kit is
+another-sgms is the origin, **not** the reference implementation. It is
 done only when both consumers run on it.
 
 ## Status

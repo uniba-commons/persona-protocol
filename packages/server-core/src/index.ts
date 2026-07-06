@@ -1,4 +1,4 @@
-// persona-server-core — the server-side half of persona-kit shared by every
+// persona-server-core — the server-side half of persona-protocol shared by every
 // cookie-profile adapter (Hono, Next.js, ...): session token signing and
 // verification, single-use claim codes, and the claim decision table.
 // Framework wiring (cookie attributes, routes, middleware) lives in the

@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'Portable anonymous identity: browser-carried personas with optional OIDC account linking'
   spec.description = 'Seams, OIDC verifier contract, and account-link decision logic for the ' \
-                     'persona-kit protocol: start using an app with no login, carry a per-browser ' \
+                     'persona-protocol: start using an app with no login, carry a per-browser ' \
                      'persona, and optionally graft it onto a verified account later.'
-  spec.homepage = 'https://github.com/uniba-commons/persona-kit'
+  spec.homepage = 'https://github.com/uniba-commons/persona-protocol'
 
   spec.required_ruby_version = '>= 3.1'
 

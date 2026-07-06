@@ -1,10 +1,10 @@
 # Get started
 
 ::: warning Pre-v0
-persona-kit is under active development. The protocol and the reference
+persona-protocol is under active development. The protocol and the reference
 libraries exist and are covered by cross-language conformance tests, but nothing
 is published to a package registry yet and the APIs may still move. This page
-shows the *shape* of consuming persona-kit, not a stable install.
+shows the *shape* of consuming persona-protocol, not a stable install.
 :::
 
 ## What exists today
@@ -27,7 +27,7 @@ shows the *shape* of consuming persona-kit, not a stable install.
 
 ## The shape of it
 
-persona-kit is wired, not called. You inject your app's concerns into the
+persona-protocol is wired, not called. You inject your app's concerns into the
 generic core and implement a small storage port over your own models.
 
 ### Ruby: wire the seams

@@ -1,7 +1,7 @@
 {
   "name": "@uniba-commons/persona-apollo",
   "version": "0.1.0",
-  "description": "Apollo Client transport adapter for persona-kit: the X-Agent-Id header link and the NOT_JOINED join-retry link.",
+  "description": "Apollo Client transport adapter for persona-protocol: the X-Agent-Id header link and the NOT_JOINED join-retry link.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
