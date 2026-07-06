@@ -25,12 +25,19 @@ Google Workspace(`hd=uniba.jp`)、クライアントは **JWKS でオフライ�
 そのもの。特定 IdP のロジックを kit にハードコードせず、汎用 verifier + preset の
 構成に保つ(library-posture)。
 
-### 2. TS を先に、Ruby は後追い
+### 2. TS を先に、Ruby は後追い(2026-07-06 に Ruby も追随済み)
 
 uniba/auth 自身のスタックが Workers + JWKS オフライン検証で、server-core の
-Web-Crypto ネイティブ・edge 前提と噛み合う。Ruby(another-sgms / header profile)の
-実 verifier は JWT/JWKS ライブラリ依存が増えるため後続(roadmap Phase 2)。
-consumer 化は consumer の判断に委ねる方針なので、まず TS で設計を固める。
+Web-Crypto ネイティブ・edge 前提と噛み合う。まず TS で設計を固め、その後 Ruby
+(`Persona::Oidc::Verifier` + `.uniba_auth` preset)を同契約で実装し、`authorize` /
+stash の変更も Ruby(StubProvider / LinkStore pending)へ反映して**再同期完了**。
+Ruby 署名は jwt gem(OpenSSL、RS256 / ES256)を使い、gem に runtime 依存
+`jwt ~> 2.7` を追加(stub と他の機構は依存ゼロのまま)。
+
+**言語間の非対称(意図的)**: TS は Web Crypto で EdDSA(Ed25519)も対応するが、
+Ruby の EdDSA は rbnacl(C ext)依存になるため据え置き。uniba/auth は
+「EdDSA もしくは RS256」なので、RS256 を共通分母とすれば両言語で連携可能。
+EdDSA が必要になったら Ruby 側の follow-up。
 
 ### 3. provider 契約を per-flow stash 対応に進化(pre-v0 の破壊的変更)
 

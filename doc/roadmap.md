@@ -41,9 +41,11 @@ kit に同梱して配る:
   scope / `hd=uniba.jp` / email ドメイン既定を乗せた薄い設定。uniba/auth は
   未実装(設計ドキュメント段階)なので issuer は consumer 指定、token claim の
   ドメイン検査は暫定(auth の token spec 確定時に見直す)
-- **Ruby 側の実 verifier**(gem): 同じ provider 契約の Ruby 実装。header
-  profile の consumer(another-sgms)向け。TS 契約の `authorize`/stash 変更を
-  Ruby にも反映して再同期する
+- ✅ **Ruby 側の実 verifier**(gem `Persona::Oidc::Verifier`): 同じ provider
+  契約の Ruby 実装(PKCE / discovery / JWKS 署名検証 / claim 検証 + uniba_auth
+  preset)。TS 契約の `authorize`/stash 変更を Ruby にも反映して再同期済み。
+  署名は jwt gem(OpenSSL、RS256 / ES256)。**EdDSA は rbnacl 依存のため据え置き**
+  (TS は Web Crypto で対応済み — 言語間の非対称)。自己署名 JWKS の契約テストで検証
 - **Google provider preset**: 汎用 verifier の preset として後日提供(uniba/auth
   を優先したため後回し)
 - consumer 側の獲得手順が「バージョン更新 + provider 登録 1 行 + リンク UI」で

@@ -46,7 +46,8 @@ doc/                         # internal design record (ja)
   decisions/                  # decision records
 conformance/                  # shared cross-language test vectors (§10 of
                               # the spec); run by both implementations
-gems/persona/                 # Ruby gem: seams, OIDC provider registry,
+gems/persona/                 # Ruby gem: seams, OIDC provider registry +
+                              # verifier (PKCE + JWKS, uniba/auth preset),
                               # AccountLink (storage-port based), LinkStore,
                               # ClaimCode
 packages/core/                # TS: agent-id holder, join handshake,

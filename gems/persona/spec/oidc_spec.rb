@@ -15,9 +15,10 @@ describe Persona::Oidc::StubProvider do
     expect(identity.provider).to eq 'example-idp'
   end
 
-  it 'escapes the state into its authorize URL' do
-    url = described_class.new.authorize_url(state: 'a b&c')
-    expect(url).to eq '/auth/oidc/start?state=a+b%26c'
+  it 'escapes the state into its authorize URL (with no stash)' do
+    start = described_class.new.authorize('a b&c')
+    expect(start.url).to eq '/auth/oidc/start?state=a+b%26c'
+    expect(start.stash).to be_nil
   end
 end
 

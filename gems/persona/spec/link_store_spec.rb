@@ -5,7 +5,15 @@ describe Persona::Oidc::LinkStore do
   describe '#put_pending / #take_pending' do
     it 'round-trips the initiating browser and provider keyed by state' do
       store.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp')
-      expect(store.take_pending('state-1')).to eq(agent_uid: 'agent-a', provider: 'example-idp')
+      expect(store.take_pending('state-1')).to eq(agent_uid: 'agent-a', provider: 'example-idp', stash: nil)
+    end
+
+    it 'round-trips the per-flow stash (PKCE verifier, nonce)' do
+      store.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp',
+                        stash: { code_verifier: 'cv', nonce: 'n' })
+      expect(store.take_pending('state-1')).to eq(
+        agent_uid: 'agent-a', provider: 'example-idp', stash: { code_verifier: 'cv', nonce: 'n' },
+      )
     end
 
     it 'is single use: the second take returns nil' do
@@ -49,7 +57,7 @@ describe Persona::Oidc::LinkStore do
     it 'accepts a connection pool responding to #with' do
       pooled = described_class.new(redis: FakeRedisPool.new(redis))
       pooled.put_pending('state-1', agent_uid: 'agent-a', provider: 'example-idp')
-      expect(pooled.take_pending('state-1')).to eq(agent_uid: 'agent-a', provider: 'example-idp')
+      expect(pooled.take_pending('state-1')).to eq(agent_uid: 'agent-a', provider: 'example-idp', stash: nil)
     end
   end
 

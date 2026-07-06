@@ -17,5 +17,9 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*.rb']
   spec.require_paths = ['lib']
 
+  # For the production OIDC verifier (JWKS signature verification, RS256/ES256).
+  # The stub provider and the rest of the gem need no runtime dependencies.
+  spec.add_dependency 'jwt', '~> 2.7'
+
   spec.metadata['rubygems_mfa_required'] = 'true'
 end
