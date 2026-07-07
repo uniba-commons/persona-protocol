@@ -2,7 +2,7 @@ require 'digest'
 require 'securerandom'
 
 module Persona
-  # Single-use claim codes (doc/protocol.md §6): generation, input
+  # Single-use claim codes (docs/spec §6): generation, input
   # normalization, display formatting, and digest-at-rest. Codes use
   # Crockford base32 (no I, L, O, U) so they survive being read aloud or
   # typed. Storage keeps only the digest; consumption is the consumer's

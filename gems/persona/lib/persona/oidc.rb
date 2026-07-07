@@ -2,7 +2,7 @@ require 'cgi'
 
 module Persona
   # OIDC account linking — the verification half of binding a persona to an
-  # external identity provider. persona-protocol owns the flow (doc/protocol.md
+  # external identity provider. persona-protocol owns the flow (docs/spec
   # §7); the application registers one provider object per IdP via
   # Persona.config.register_oidc_provider, and gains new providers by
   # updating this gem and registering them — not by reimplementing the flow.

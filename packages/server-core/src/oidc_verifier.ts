@@ -1,4 +1,4 @@
-// A production OIDC verifier provider (doc/protocol.md §7, P-16): the
+// A production OIDC verifier provider (docs/spec §7, P-16): the
 // authorization-code + PKCE flow, code exchange at the token endpoint, and
 // id_token validation against the IdP's published JWKS. Web Crypto + fetch
 // only, so it runs on Node 18+, edge, and workers. Configure it per IdP, or use
@@ -189,7 +189,7 @@ export const createOidcVerifierProvider = (config: OidcVerifierConfig): OidcProv
 // and client credentials are still per-deployment. auth is not yet published,
 // so `issuer` is required (no default endpoint is assumed) and the token-claim
 // domain check defaults to the email domain — provisional until auth's token
-// spec lands. See doc/roadmap.md Phase 2.
+// spec lands.
 export type UnibaAuthConfig = {
   issuer: string;
   clientId: string;

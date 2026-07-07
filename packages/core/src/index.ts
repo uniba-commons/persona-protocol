@@ -2,8 +2,7 @@
 // module: the agent_uid holder, the opt-in join handshake, and the wire
 // protocol names. Transport glue (Apollo links, ActionCable param, ...)
 // lives in the sibling adapter packages; this package must stay free of
-// framework and transport dependencies. See doc/persona-module-handoff.md
-// at the repository root.
+// framework and transport dependencies.
 export { AGENT_ID_HEADER, AGENT_ID_PARAM, NOT_JOINED_CODE } from './protocol.js';
 export { getAgentId, setAgentId, generateAgentId, clearAgentId } from './agent_id.js';
 export { registerJoinDialogOpener, requestJoin, resolvePendingJoins } from './join_orchestrator.js';

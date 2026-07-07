@@ -1,5 +1,5 @@
 {
-  "spec": "doc/protocol.md §6 claim decision table",
+  "spec": "docs/spec/claims.md (claim decision table)",
   "identity": {
     "provider": "example-idp",
     "subject": "person-1"

@@ -1,6 +1,6 @@
 // The wire-protocol names shared by every persona-protocol transport. These are
 // protocol, not implementation: the Ruby gem declares the same values, and
-// doc/protocol.md (the source of truth once written) must list them.
+// docs/spec (the source of truth once written) must list them.
 
 // HTTP header carrying the browser's agent_uid on header-transport consumers.
 export const AGENT_ID_HEADER = 'X-Agent-Id';

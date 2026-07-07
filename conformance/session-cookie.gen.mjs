@@ -23,7 +23,7 @@ const foreign = await createSessionCodec({ secret: 'some-other-secret' })
 const tampered = valid.slice(0, -1) + (valid.endsWith('A') ? 'B' : 'A');
 
 const fixture = {
-  spec: 'doc/protocol.md C-1',
+  spec: 'docs/spec/cookie-profile.md (C-1)',
   secret: SECRET,
   vectors: [
     {

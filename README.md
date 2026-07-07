@@ -1,82 +1,61 @@
 # persona-protocol
 
-Portable anonymous identity for the web: start using an app with **no login**,
-carry a per-browser persona, and optionally graft it onto a verified account
-(OIDC) later.
+Portable anonymous identity for the web — **a protocol you run, not a service
+you rent.** Start using an app with **no login**, carry a per-browser persona,
+and optionally graft it onto a verified account (OIDC) later.
 
-Extracted from [another-sgms](https://github.com/uniba/super-good-meetings)
-(PRs [#18](https://github.com/uniba/super-good-meetings/pull/18) /
-[#19](https://github.com/uniba/super-good-meetings/pull/19)). Two consumers
-are targeted from day one, on equal footing:
+The normative specification lives in [`docs/spec/`](docs/spec/) and is backed by
+cross-language **conformance vectors** every implementation must pass. Reference
+libraries ship for TypeScript and Ruby.
 
-- **another-sgms** — Rails + GraphQL + Apollo; identity carried by an
-  `X-Agent-Id` header on every request
-- **my-local-3-hono** — Hono + htmx (server-rendered, no client framework);
-  identity carried by an HMAC-signed session cookie, with the agent id as an
-  exportable "share key"
+## Two transport profiles
 
-another-sgms is the origin, **not** the reference implementation. It is
-done only when both consumers run on it.
+persona-protocol carries the browser's identity one of two ways; an application
+picks exactly one as its source of identity truth:
 
-## Status
-
-De-appified (pre-v0). The seed (verbatim copy from another-sgms branch
-`sgms-17`) has been made standalone: the Ruby gem builds and its specs run
-without Rails, and the TypeScript side builds as three workspace packages
-with no runtime dependencies. See
-[doc/decisions/0001-de-appification.md](doc/decisions/0001-de-appification.md)
-for what was decided (and what is still open). The protocol spec (draft v0.1,
-in `docs/spec/`) covers both transports and is backed by cross-language
-conformance fixtures; the consumer PRs are the next deliverable.
+- **Header profile** — the browser holds the agent id and attaches it as an
+  `X-Agent-Id` header. Fits API-separated clients: SPAs, native apps, CLIs.
+- **Cookie profile** — an HMAC-signed session cookie carries a reference to the
+  persona, available at render time. Fits server-rendered and hybrid stacks.
 
 ## Layout
 
 ```
-docs/                         # VitePress site (en): the normative spec, split
-  spec/                       #   into navigable chapters — the main content
-  {why,how-it-works,comparison,get-started}.md  # narrative intro & positioning
-doc/                         # internal design record (ja)
-  consumers.md                # consumer profiles, incl. a fictional third
-                              # consumer used to stress the design
-  prior-art.md                # prior-art survey & positioning; naming risks
-  roadmap.md                  # phases; consumers gain features by updating
-  persona-module-handoff.md   # the handoff: inventory, invariants, plan
-  auth-removal-plan.md        # design history, copied from another-sgms
-  protocol.md                 # stub → points at docs/spec/ (spec moved there)
-  decisions/                  # decision records
-conformance/                  # shared cross-language test vectors (§10 of
-                              # the spec); run by both implementations
-gems/persona/                 # Ruby gem: seams, OIDC provider registry +
-                              # verifier (PKCE + JWKS, uniba/auth preset),
-                              # AccountLink (storage-port based), LinkStore,
-                              # ClaimCode
-packages/core/                # TS: agent-id holder, join handshake,
-                              # wire-protocol names; no dependencies
-packages/server-core/         # TS: cookie-profile server core — session
-                              # tokens, claim codes, claim decision table,
-                              # OIDC provider registry + link-store round-trip,
-                              # OIDC verifier (PKCE + JWKS) + uniba/auth preset
-packages/hono/                # TS: Hono adapter (cookie profile) — session /
-                              # pending cookies, persona middleware, gating
-packages/apollo/              # TS: Apollo links (X-Agent-Id, NOT_JOINED retry)
-packages/cable/               # TS: ActionCable agent_id query param
-examples/                     # how a Rails consumer wires the seams and
-                              # implements the AccountLink storage port
+docs/                  # the normative spec (VitePress site): spec/ chapters + intro
+conformance/           # cross-language conformance vectors (data only)
+gems/persona/          # Ruby gem: seams, OIDC provider registry + verifier,
+                       # account-link decision logic, single-use claim codes
+packages/core/         # TS: agent-id holder, join handshake, wire names
+packages/server-core/  # TS: cookie-profile session tokens, claim codes, claim
+                       # decision table, OIDC verifier + provider registry
+packages/hono/         # TS: Hono adapter (cookie profile)
+packages/apollo/       # TS: Apollo links (X-Agent-Id, NOT_JOINED retry)
+packages/cable/        # TS: ActionCable agent_id query param
+examples/              # how a consumer wires the seams and the storage port
 ```
 
-Build & test (both suites include the shared conformance vectors):
+## Build & test
 
 ```
-cd gems/persona && bundle install && bundle exec rspec   # Ruby
 npm install && npm test                                  # TypeScript
-npm run docs:dev                                         # docs site (local)
+cd gems/persona && bundle install && bundle exec rspec   # Ruby
+npm run docs:dev                                          # spec site (local)
 ```
 
-## Where to start
+Both suites run the shared conformance vectors, so the TypeScript and Ruby sides
+cannot drift from the wire contract.
 
-Read the spec in `docs/spec/` (run `npm run docs:dev`) — the normative source
-covering both transports (header and cookie); language packages are adapters
-around it. For background, `doc/persona-module-handoff.md` is the original
-handoff and `doc/decisions/` records how its open points were settled.
+## Adopt it
 
-Publishing target: the `uniba-commons` GitHub org (later; local-only for now).
+The highest-value first step needs no dependency: adopt the
+[conformance vectors](conformance/) as tests against your **own** implementation
+— they freeze the wire format so your codec can't drift from another's. Climb
+from there only as features earn it: a durable browser key, a verified account
+via OIDC, then linking across apps. Reading stays anonymous throughout, and the
+browser stays the entity.
+
+Start with the spec: [`docs/spec/`](docs/spec/).
+
+## License
+
+[MIT](LICENSE) © UNIBA COMMONS Authors.

@@ -1,4 +1,4 @@
-// The claim decision table (doc/protocol.md §6): binds a verified identity
+// The claim decision table (docs/spec §6): binds a verified identity
 // (provider + subject) — or any claim subject — to a persona. Mirrors the
 // Ruby implementation (gems/persona/lib/persona/account_link.rb); both are
 // checked against the same conformance vectors.

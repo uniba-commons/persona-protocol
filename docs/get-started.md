@@ -153,6 +153,6 @@ already have.
 
 ## Following along
 
-The repository's `doc/` directory holds the design record: the protocol spec,
-the roadmap, the prior-art survey, the consumer profiles, and the decision log.
-Start with the [protocol](/spec/).
+Start with the [protocol specification](/spec/) — the normative source for both
+transports. The reference libraries (TypeScript and Ruby) implement it against
+the shared conformance vectors.

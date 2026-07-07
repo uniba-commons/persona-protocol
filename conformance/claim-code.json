@@ -1,5 +1,5 @@
 {
-  "spec": "doc/protocol.md §6 (P-7)",
+  "spec": "docs/spec/claims.md (P-7)",
   "normalize": [
     { "input": "3f7k-9b2d-qxw4-m8zp", "normalized": "3F7K9B2DQXW4M8ZP" },
     { "input": "  3F7K 9B2D\nQXW4-M8ZP  ", "normalized": "3F7K9B2DQXW4M8ZP" },

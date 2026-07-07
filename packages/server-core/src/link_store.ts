@@ -1,5 +1,5 @@
 // Short-lived storage that ties the OIDC redirect round-trip to the browser
-// that started it — without ever putting the credential in a URL (doc/protocol.md
+// that started it — without ever putting the credential in a URL (docs/spec
 // §7, P-14/P-15). Mirrors the Ruby gem's Persona::Oidc::LinkStore.
 //
 // The state entry is single-use (CSRF-style); the result entry is read

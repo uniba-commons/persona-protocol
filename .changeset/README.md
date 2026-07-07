@@ -10,5 +10,4 @@ tags).
 
 Scope: the `@uniba-commons/persona-*` npm packages, including
 `@uniba-commons/persona-conformance`. The Ruby gem versions separately
-(`gems/persona/lib/persona/version.rb` + a git tag). See
-[doc/decisions/0008-distribution-and-release.md](../doc/decisions/0008-distribution-and-release.md).
+(`gems/persona/lib/persona/version.rb` + a git tag).

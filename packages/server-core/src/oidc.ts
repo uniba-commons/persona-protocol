@@ -1,4 +1,4 @@
-// OIDC account linking — the provider contract and registry (doc/protocol.md
+// OIDC account linking — the provider contract and registry (docs/spec
 // §7). A provider is one object per IdP behind three methods; applications gain
 // a new provider by registering it, not by reimplementing the flow. Mirrors the
 // Ruby gem's Persona::Oidc (gems/persona/lib/persona/oidc.rb).

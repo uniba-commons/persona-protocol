@@ -36,7 +36,7 @@ module Persona
 
       # provider records which registered IdP this round-trip was begun for,
       # so the callback verifies against the same provider (multi-provider
-      # deployments; doc/protocol.md §7). stash carries the provider's per-flow
+      # deployments; docs/spec §7). stash carries the provider's per-flow
       # secrets (PKCE code_verifier, nonce) from authorize to verify.
       def put_pending(state, agent_uid:, provider:, stash: nil)
         write(PENDING_PREFIX + state, { agent_uid: agent_uid, provider: provider, stash: stash }, PENDING_TTL)

@@ -1,4 +1,4 @@
-// The OIDC account-linking round-trip (doc/protocol.md §7), as three
+// The OIDC account-linking round-trip (docs/spec §7), as three
 // transport-neutral steps an adapter wires to its routes. The identity decision
 // happens on the credentialed `complete` request (P-8); only opaque tokens ride
 // the URL (P-14); `state` is single-use and `link_token` is dropped on success

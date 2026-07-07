@@ -8,7 +8,7 @@ require_relative 'persona/oidc/link_store'
 require_relative 'persona/account_link'
 
 # Persona — the app-agnostic core of the "anonymous identity you carry per
-# browser" mechanism. The protocol itself is specified in doc/protocol.md;
+# browser" mechanism. The protocol itself is specified in docs/spec;
 # this gem is one adapter around it.
 #
 # The identity records themselves (agent_uid -> user resolution, guest
@@ -29,7 +29,7 @@ module Persona
 
   # HTTP header and WebSocket query param (for transports that can't set
   # custom headers) that carry the browser-generated agent_uid. The value
-  # itself is never echoed back in responses — doc/protocol.md P-3 / H-3.
+  # itself is never echoed back in responses — docs/spec P-3 / H-3.
   AGENT_ID_HEADER = 'X-Agent-Id'.freeze
   AGENT_ID_PARAM = 'agent_id'.freeze
 

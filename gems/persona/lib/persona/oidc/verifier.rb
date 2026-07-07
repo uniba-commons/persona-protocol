@@ -33,7 +33,7 @@ module Persona
       end
     end
 
-    # Production OIDC verifier provider (doc/protocol.md §7, P-16): the
+    # Production OIDC verifier provider (docs/spec §7, P-16): the
     # authorization-code + PKCE flow, OIDC discovery, code exchange, and
     # id_token validation against the IdP's published JWKS. Mirrors the
     # TypeScript createOidcVerifierProvider.
@@ -41,7 +41,7 @@ module Persona
     # Signature verification uses the jwt gem's OpenSSL backend and covers
     # RS256 and ES256. EdDSA (Ed25519) is intentionally not enabled here — it
     # needs rbnacl in Ruby — so an IdP signing with EdDSA must expose an
-    # RS256/ES256 key or wait for that follow-up (doc/roadmap.md Phase 2).
+    # RS256/ES256 key or wait for that follow-up.
     #
     # The clock (#now) is injectable so expiry is checked here rather than by
     # the jwt gem, matching the TS verifier and keeping tests deterministic.

@@ -1,4 +1,4 @@
-// Cookie-profile session tokens (doc/protocol.md C-1): an HMAC-SHA256-signed
+// Cookie-profile session tokens (docs/spec C-1): an HMAC-SHA256-signed
 // payload carrying at least the persona reference and an expiry. Built on
 // Web Crypto only, so it runs identically on Node (>= 18), edge runtimes,
 // and workers. The cookie *attributes* (HttpOnly, Secure, SameSite — C-2)

@@ -1,9 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 // The public documentation site. The protocol specification is the main
-// content (see /spec/); the narrative pages introduce and position it. Internal
-// design material (the handoff, decision records, ja design notes) stays in the
-// repository's doc/ directory and is intentionally not part of this site.
+// content (see /spec/); the narrative pages introduce and position it.
 export default defineConfig({
   lang: 'en-US',
   title: 'persona-protocol',
