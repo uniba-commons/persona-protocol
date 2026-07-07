@@ -1,0 +1,35 @@
+{
+  "name": "@uniba-commons/persona-apollo",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "description": "Apollo Client transport adapter for persona-protocol: the X-Agent-Id header link and the NOT_JOINED join-retry link.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@uniba-commons/persona-core": "^0.1.0"
+  },
+  "peerDependencies": {
+    "@apollo/client": "^3.7.0"
+  },
+  "devDependencies": {
+    "@apollo/client": "^3.11.0",
+    "graphql": "^16.9.0"
+  }
+}

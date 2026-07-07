@@ -1,0 +1,6 @@
+{
+  "spec": "docs/spec/header-profile.md (H-2, H-4)",
+  "agent_id_header": "X-Agent-Id",
+  "agent_id_param": "agent_id",
+  "not_joined_code": "NOT_JOINED"
+}

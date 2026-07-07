@@ -1,0 +1,59 @@
+{
+  "spec": "docs/spec/cookie-profile.md (C-1)",
+  "secret": "conformance-test-secret",
+  "vectors": [
+    {
+      "id": "valid-token-returns-payload",
+      "token": "eyJzdWIiOiJwZXJzb25hLTEiLCJiaWQiOiJicm93c2VyLTEiLCJleHAiOjE3NTE3MDM1NDB9.m_L4XLx78Jxdx6CktfGfGtt5PLTRuOdEAvMMR62Sg3E",
+      "verify_at": 1751700000,
+      "valid": true,
+      "payload": {
+        "sub": "persona-1",
+        "bid": "browser-1",
+        "exp": 1751703540
+      }
+    },
+    {
+      "id": "expired-token-rejected",
+      "token": "eyJzdWIiOiJwZXJzb25hLTEiLCJiaWQiOiJicm93c2VyLTEiLCJleHAiOjE3NTE2OTY0NjB9.Pt75SmKAYqMJkQ_VTKCrC-A1XJSclulk4hRFspRoCxI",
+      "verify_at": 1751700000,
+      "valid": false
+    },
+    {
+      "id": "tampered-signature-rejected",
+      "token": "eyJzdWIiOiJwZXJzb25hLTEiLCJiaWQiOiJicm93c2VyLTEiLCJleHAiOjE3NTE3MDM1NDB9.m_L4XLx78Jxdx6CktfGfGtt5PLTRuOdEAvMMR62Sg3A",
+      "verify_at": 1751700000,
+      "valid": false
+    },
+    {
+      "id": "foreign-secret-rejected",
+      "token": "eyJzdWIiOiJwZXJzb25hLTEiLCJleHAiOjE3NTE3MDM1NDB9.bONSieD5CQmik6bt6VQMbFUjFgYBCVD5FY1TJoNWFi0",
+      "verify_at": 1751700000,
+      "valid": false
+    },
+    {
+      "id": "exp-exactly-now-rejected",
+      "token": "eyJzdWIiOiJwZXJzb25hLTEiLCJiaWQiOiJicm93c2VyLTEiLCJleHAiOjE3NTE3MDM1NDB9.m_L4XLx78Jxdx6CktfGfGtt5PLTRuOdEAvMMR62Sg3E",
+      "verify_at": 1751703540,
+      "valid": false
+    },
+    {
+      "id": "malformed-no-separator-rejected",
+      "token": "not-a-token",
+      "verify_at": 1751700000,
+      "valid": false
+    },
+    {
+      "id": "malformed-bad-base64-rejected",
+      "token": "!!!.???",
+      "verify_at": 1751700000,
+      "valid": false
+    },
+    {
+      "id": "empty-token-rejected",
+      "token": "",
+      "verify_at": 1751700000,
+      "valid": false
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Netlify configuration for the persona-protocol documentation site.
+#
+# The site is the VitePress app under docs/; the rest of the repository (the
+# gem, the TypeScript packages, the internal design notes) is not part of the
+# deploy. Connecting this repo in Netlify ("New site from Git") picks these
+# settings up automatically. Clean URLs (VitePress cleanUrls) are served by
+# Netlify's built-in pretty-URL resolution, so no redirect rules are needed.
+[build]
+  # Pin the build to the repository root. This monorepo has several package.json
+  # files, and Netlify's import auto-detection may otherwise set the base to one
+  # of the packages/* directories — which breaks both `npm install` (it would
+  # miss the root devDependencies, incl. VitePress) and the build command.
+  base = "."
+  command = "npm run docs:build"
+  publish = "docs/.vitepress/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# VitePress emits content-hashed files under /assets — safe to cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

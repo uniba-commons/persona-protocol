@@ -1,0 +1,22 @@
+{
+  "name": "persona-protocol",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "conformance"
+  ],
+  "scripts": {
+    "build": "npm run build -w @uniba-commons/persona-core && npm run build -w @uniba-commons/persona-server-core && npm run build -w @uniba-commons/persona-apollo -w @uniba-commons/persona-cable -w @uniba-commons/persona-hono",
+    "test": "npm run build && vitest run",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "clean": "rm -rf packages/*/dist"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "typescript": "^5.5.0",
+    "vitepress": "^1.6.4",
+    "vitest": "^3.0.0"
+  }
+}

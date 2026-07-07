@@ -1,0 +1,10 @@
+node_modules/
+packages/*/dist/
+*.tsbuildinfo
+
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Library: consumers resolve their own dependency versions.
+gems/persona/Gemfile.lock

@@ -1,0 +1,129 @@
+{
+  "spec": "docs/spec/claims.md (claim decision table)",
+  "identity": {
+    "provider": "example-idp",
+    "subject": "person-1"
+  },
+  "cases": [
+    {
+      "id": "1-anonymous-no-holder-signs-up",
+      "spec_row": 1,
+      "given": {
+        "browser": "anonymous",
+        "agent_uid": "agent-new",
+        "holder": null,
+        "confirm_merge": false
+      },
+      "expect": {
+        "personas_delta": 1,
+        "result_user": "new",
+        "subject_holder": "result",
+        "result_has_agent_binding": true,
+        "merged": false,
+        "merge_preview": false,
+        "echoed_agent_uid": "agent-new"
+      }
+    },
+    {
+      "id": "2-anonymous-adopts-existing-holder",
+      "spec_row": 2,
+      "given": {
+        "browser": "anonymous",
+        "agent_uid": "agent-second",
+        "holder": {
+          "agent_uid": "agent-holder"
+        },
+        "confirm_merge": false
+      },
+      "expect": {
+        "personas_delta": 0,
+        "result_user": "holder",
+        "result_has_agent_binding": true,
+        "merged": false,
+        "merge_preview": false,
+        "echoed_agent_uid": "agent-second"
+      }
+    },
+    {
+      "id": "3-joined-holder-is-self-noop",
+      "spec_row": 3,
+      "given": {
+        "browser": "joined",
+        "agent_uid": "agent-y",
+        "holder": "current",
+        "confirm_merge": false
+      },
+      "expect": {
+        "personas_delta": 0,
+        "result_user": "current",
+        "account_bindings_delta": 0,
+        "agent_bindings_delta": 0,
+        "merged": false,
+        "merge_preview": false,
+        "echoed_agent_uid": null
+      }
+    },
+    {
+      "id": "4-joined-unbound-subject-links",
+      "spec_row": 4,
+      "given": {
+        "browser": "joined",
+        "agent_uid": "agent-y",
+        "holder": null,
+        "confirm_merge": false
+      },
+      "expect": {
+        "personas_delta": 0,
+        "result_user": "current",
+        "subject_holder": "current",
+        "merged": false,
+        "merge_preview": false,
+        "echoed_agent_uid": null
+      }
+    },
+    {
+      "id": "5-conflict-returns-preview-changes-nothing",
+      "spec_row": 5,
+      "given": {
+        "browser": "joined",
+        "agent_uid": "agent-y",
+        "holder": {
+          "agent_uid": "agent-x"
+        },
+        "confirm_merge": false
+      },
+      "expect": {
+        "personas_delta": 0,
+        "result_user": "current",
+        "agent_bindings_delta": 0,
+        "account_bindings_delta": 0,
+        "merged": false,
+        "merge_preview": true,
+        "echoed_agent_uid": null,
+        "current_retired": false
+      }
+    },
+    {
+      "id": "6-confirmed-merge-folds-into-holder",
+      "spec_row": 6,
+      "given": {
+        "browser": "joined",
+        "agent_uid": "agent-y",
+        "holder": {
+          "agent_uid": "agent-x"
+        },
+        "confirm_merge": true
+      },
+      "expect": {
+        "personas_delta": -1,
+        "result_user": "holder",
+        "subject_holder": "holder",
+        "merged": true,
+        "merge_preview": false,
+        "echoed_agent_uid": null,
+        "current_retired": true,
+        "browser_binding_moved_to_holder": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+/* The draft badge on the spec overview. */
+.spec-version {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  padding: 2px 10px;
+  border: 1px solid var(--vp-c-brand-1);
+  border-radius: 999px;
+  color: var(--vp-c-brand-1);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Requirement-ID headings (### P-1 — …) read as anchored rules. Monospace the
+   ID so P-6 / H-4 / C-1 stand out and feel addressable. */
+.vp-doc h3[id^="p-"],
+.vp-doc h3[id^="h-"],
+.vp-doc h3[id^="c-"] {
+  font-variant-numeric: tabular-nums;
+  scroll-margin-top: 6rem;
+}
