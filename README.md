@@ -18,6 +18,19 @@ picks exactly one as its source of identity truth:
 - **Cookie profile** — an HMAC-signed session cookie carries a reference to the
   persona, available at render time. Fits server-rendered and hybrid stacks.
 
+## Install
+
+```sh
+# npm — the base plus the adapter for your stack
+npm install @uniba-commons/persona-core @uniba-commons/persona-hono
+
+# Ruby
+bundle add persona-protocol
+```
+
+Or adopt the conformance vectors as tests against your own implementation, with
+no runtime dependency: `npm install -D @uniba-commons/persona-conformance`.
+
 ## Layout
 
 ```
