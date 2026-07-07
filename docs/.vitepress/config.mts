@@ -64,7 +64,8 @@ export default defineConfig({
 
     footer: {
       message: 'Pre-v0. A protocol and reference libraries, developed in the open.',
-      copyright: 'Uniba Inc.',
+      copyright:
+        'Copyright © 2026 <a href="https://uni.ba/" target="_blank" rel="noreferrer">UNIBA COMMONS</a>',
     },
   },
 })
