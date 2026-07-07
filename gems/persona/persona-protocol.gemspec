@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   # consumer's existing code keeps working unchanged.
   spec.name = 'persona-protocol'
   spec.version = Persona::VERSION
-  spec.authors = ['UNIBA COMMONS']
+  spec.authors = ['UNIBA COMMONS Authors']
   spec.email = ['haruma@uniba.jp']
 
   spec.summary = 'Portable anonymous identity: browser-carried personas with optional OIDC account linking'
