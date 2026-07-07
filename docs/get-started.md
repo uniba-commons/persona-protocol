@@ -1,19 +1,35 @@
 # Get started
 
-::: warning Pre-v0
-persona-protocol is under active development. The protocol and the reference
-libraries exist and are covered by cross-language conformance tests, but nothing
-is published to a package registry yet and the APIs may still move. This page
-shows the *shape* of consuming persona-protocol, not a stable install.
-
-**Consuming before publish:** the packages declare their inter-package
-dependencies as registry ranges (e.g. `@uniba-commons/persona-server-core:
-^0.1.0`), so installing a single package from a local tarball or `file:` dep
-hits an npm **E404** on its transitive `@uniba-commons/*` deps — the registry
-has nothing to resolve them from yet. Install all of them as top-level `file:`
-deps and npm dedupe satisfies the ranges from the local copies. This goes away
-once the packages are published.
+::: tip v0.1 — early release
+persona-protocol **v0.1.0** is published to npm and RubyGems. The protocol and
+its invariants are stable and backed by cross-language conformance vectors; the
+library APIs are early 0.x and may still evolve before 1.0.
 :::
+
+## Install
+
+TypeScript — the base plus the adapter for your stack:
+
+```sh
+npm install @uniba-commons/persona-core        # base: agent-id holder + join
+npm install @uniba-commons/persona-server-core # cookie-profile server core
+npm install @uniba-commons/persona-hono        # Hono adapter (cookie profile)
+npm install @uniba-commons/persona-apollo      # Apollo link (header profile)
+npm install @uniba-commons/persona-cable       # ActionCable (header profile)
+```
+
+Ruby:
+
+```sh
+bundle add persona-protocol
+```
+
+Or adopt just the conformance vectors as tests against your own implementation,
+with no runtime dependency:
+
+```sh
+npm install -D @uniba-commons/persona-conformance
+```
 
 ## What exists today
 
