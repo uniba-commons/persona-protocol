@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "license": "MIT",
   "description": "Portable anonymous identity: the agent_uid holder, the join handshake, and the persona-protocol wire-protocol names. Transport- and framework-agnostic.",
   "type": "module",
   "main": "dist/index.js",

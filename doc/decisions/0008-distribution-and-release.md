@@ -16,7 +16,7 @@ consumer 評価の結論は「core コードの再利用価値は低い・**契�
 ## 未実行(明示 go 待ち)
 
 - 実際の `npm publish` / `gem push` は **irreversible**(公開レジストリの名前・版は取り消せない)。明示的な合図まで実行しない。
-- 公開前に **LICENSE の付与**を要検討(現状ライセンス未宣言。無ライセンスは法的に曖昧)。
+- ~~公開前に LICENSE の付与を要検討~~ → **MIT で付与済み**(上記 更新)。残る唯一の go 待ちは実際の publish そのもの。
 - 公開 package 名の差別化([0006](0006-prior-art-positioning.md) の論点)は npm は scoped `@uniba-commons/*` を継続、gem は上記 決定 4 のとおり `persona-protocol` へ差別化。
 
 ## 更新(2026-07-06、publish 前 consumer フィードバック)
@@ -26,6 +26,6 @@ publish 前に 2 consumer(another-sgms=Ruby・my-local-3-hono=Hono)で試験導�
 - **gem 名衝突** → 配布名を `persona-protocol` に差別化(決定 4 を改訂)。
 - **scoped npm package に `publishConfig.access: "public"` を明示**(scoped の初回 publish が restricted に落ちるのを防ぐ)。
 - **`wire-names.json` の `spec` パス**を旧 `doc/protocol.md §10.3` から現行 `docs/spec/header-profile.md` に修正(conformance vector に凍結される前に是正)。
-- **LICENSE は未決のまま**(下記 未実行)── `gem build` も license 未指定を警告する。付与ライセンスを決めてから publish する。
+- **LICENSE = MIT に決定。** repo root と gem に `LICENSE`、各 `package.json` の `"license"` と gemspec の `spec.license` に MIT を記載。Apache-2.0(特許グラント)/ vectors の CC0 分割も検討したが、npm・gem ecosystem の既定である MIT で摩擦最小を優先(枯れた技術で特許リスクは低いと判断)。`@uniba-commons/auth` に倣った公開だが、auth 自身は `license` 未記載なので、そこは MIT 明記で上回る。
 
 DX / spec の非 blocker(read-gate `requirePersona`、pending payload の型制約緩和、conformance の profile×level 適用表、cookie interop の主張スコープ化、P-3 placeholder 規約)も同 issue で対応済み。

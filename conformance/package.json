@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "license": "MIT",
   "description": "Cross-language conformance vectors for persona-protocol: frozen wire-format and claim-decision fixtures every implementation must pass. Data only — no runtime code.",
   "files": [
     "*.json",

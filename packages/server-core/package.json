@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "license": "MIT",
   "description": "Server-side core for persona-protocol's cookie profile: signed session tokens, single-use claim codes, and the claim decision table. Web Crypto only — Node 18+, edge, workers.",
   "type": "module",
   "main": "dist/index.js",

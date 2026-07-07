@@ -16,10 +16,11 @@ Gem::Specification.new do |spec|
                      'persona-protocol: start using an app with no login, carry a per-browser ' \
                      'persona, and optionally graft it onto a verified account later.'
   spec.homepage = 'https://github.com/uniba-commons/persona-protocol'
+  spec.license = 'MIT'
 
   spec.required_ruby_version = '>= 3.1'
 
-  spec.files = Dir['lib/**/*.rb']
+  spec.files = Dir['lib/**/*.rb'] + ['LICENSE']
   spec.require_paths = ['lib']
 
   # For the production OIDC verifier (JWKS signature verification, RS256/ES256).

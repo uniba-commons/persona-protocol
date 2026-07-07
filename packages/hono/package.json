@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "license": "MIT",
   "description": "Hono adapter for persona-protocol's cookie profile: session and pending-join cookies, the persona-resolution middleware, and NOT_JOINED write gating, on top of persona-server-core.",
   "type": "module",
   "main": "dist/index.js",

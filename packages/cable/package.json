@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "license": "MIT",
   "description": "ActionCable transport adapter for persona-protocol: appends the agent_id query param to the cable URL.",
   "type": "module",
   "main": "dist/index.js",
