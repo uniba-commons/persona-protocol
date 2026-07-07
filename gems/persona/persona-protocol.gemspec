@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.1'
 
-  spec.files = Dir['lib/**/*.rb'] + ['LICENSE']
+  spec.files = Dir['lib/**/*.rb'] + ['LICENSE', 'AUTHORS']
   spec.require_paths = ['lib']
 
   # For the production OIDC verifier (JWKS signature verification, RS256/ES256).

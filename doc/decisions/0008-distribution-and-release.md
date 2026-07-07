@@ -16,7 +16,7 @@ consumer 評価の結論は「core コードの再利用価値は低い・**契�
 ## 未実行(明示 go 待ち)
 
 - 実際の `npm publish` / `gem push` は **irreversible**(公開レジストリの名前・版は取り消せない)。明示的な合図まで実行しない。
-- ~~公開前に LICENSE の付与を要検討~~ → **MIT で付与済み**、著作権表記は entity 非依存の collective **`UNIBA COMMONS Authors`**(上記 更新)。これにより LICENSE 帰属は新法人設立を待たない。**publish の残りゲート**は (1) `uniba-commons` npm org への追加(hitsujiwool)、(2) 明示 go の2つのみ。新法人名義に切り替えるかどうかは product-timing の選択で、publish の前提条件ではない。
+- ~~公開前に LICENSE の付与を要検討~~ → **MIT で付与済み**、著作権表記は entity 非依存の collective **`UNIBA COMMONS Authors`**(上記 更新)。これにより LICENSE 帰属は新法人設立を待たない。collective の実体は `AUTHORS`(root と gem に配置、現状 Haruma Kikuchi のみ)。`uniba-commons` npm org への追加は **2026-07-07 完了**。**publish の残りゲートは実質「明示 go」のみ**(実行時に publish するマシンで `npm login` / RubyGems ログインが必要 — 現状このマシンは未ログイン)。新法人名義に切り替えるかどうかは product-timing の選択で、publish の前提条件ではない。
 - 公開 package 名の差別化([0006](0006-prior-art-positioning.md) の論点)は npm は scoped `@uniba-commons/*` を継続、gem は上記 決定 4 のとおり `persona-protocol` へ差別化。
 
 ## 更新(2026-07-06、publish 前 consumer フィードバック)
