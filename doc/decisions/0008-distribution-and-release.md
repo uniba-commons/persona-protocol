@@ -29,3 +29,5 @@ publish 前に 2 consumer(another-sgms=Ruby・my-local-3-hono=Hono)で試験導�
 - **LICENSE = MIT に決定。** repo root と gem に `LICENSE`、各 `package.json` の `"license"` と gemspec の `spec.license` に MIT を記載。Apache-2.0(特許グラント)/ vectors の CC0 分割も検討したが、npm・gem ecosystem の既定である MIT で摩擦最小を優先(枯れた技術で特許リスクは低いと判断)。`@uniba-commons/auth` に倣った公開だが、auth 自身は `license` 未記載なので、そこは MIT 明記で上回る。著作権表記は **`UNIBA COMMONS Authors`**(Go の "The Go Authors" と同じ collective 形。`Uniba Inc.` は不採用)。この collective 形は特定法人に紐付かないので、**LICENSE の帰属は新法人の設立と独立して確定**している。フッターはブランド表記 `UNIBA COMMONS`(→ uni.ba)のまま。
 
 DX / spec の非 blocker(read-gate `requirePersona`、pending payload の型制約緩和、conformance の profile×level 適用表、cookie interop の主張スコープ化、P-3 placeholder 規約)も同 issue で対応済み。
+
+**初回 publish のバージョン方針(2026-07-07):** 全パッケージを **uniform 0.1.0** で初回公開する(混在版番号を避け、綺麗な debut にする)。pending changeset 2本(packaging patch / hono minor)は 0.1.0 初回リリースに畳んで削除 ── 変更内容は PR #3・commit 履歴が記録。changesets は 0.1.0 公開後の次リリースから運用する。既存の git tag `v0.1.0`(rename commit を指す baseline)は、公開 commit を指すよう張り直す。
