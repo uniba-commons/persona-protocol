@@ -206,3 +206,90 @@ describe('persona-hono requirePersona read-gate', () => {
     expect(await res.json()).toEqual({ ok: true, id: 'persona-1' });
   });
 });
+
+// contextKey exists for apps whose routes already read the persona under
+// another name. The gates must follow it, or setting it turns every gate into a
+// blanket rejection — including for a perfectly valid joined session.
+describe('persona-hono contextKey composition', () => {
+  // An app wired the way a consumer with existing `c.get('user')` call sites
+  // would wire it: contextKey on the middleware, gates left bare.
+  function buildRenamed(contextKey = 'user') {
+    const cookies = createPersonaCookies({ secret: SECRET, secure: false });
+    // A custom key is outside PersonaEnv, so the consumer types the Env itself.
+    const app = new Hono<{ Variables: { user: User | null } }>();
+    app.use(
+      '*',
+      personaMiddleware({ cookies, resolvePersona: (sub) => USERS[sub] ?? null, contextKey }),
+    );
+    app.get('/', (c) => c.text('anyone can read'));
+    app.use('/settings', requirePersona({ redirectTo: '/join' }));
+    app.get('/settings', (c) => c.text('owner only'));
+    app.use('/write', requireJoined({ redirectTo: '/join' }));
+    app.post('/write', (c) => c.json({ ok: true, by: c.get('user')?.id ?? null }));
+    app.post('/join', async (c) => {
+      await cookies.setSession(c, { sub: 'persona-1' });
+      return c.json({ joined: true });
+    });
+    return app;
+  }
+
+  it('writes the persona to the configured key', async () => {
+    const app = buildRenamed();
+    const cookies = jar();
+    cookies.capture(await app.request('/join', { method: 'POST' }));
+
+    const res = await app.request('/write', { method: 'POST', headers: cookies.header() });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, by: 'persona-1' });
+  });
+
+  it('serves an owner-only read to a joined persona under a renamed key', async () => {
+    const app = buildRenamed();
+    const cookies = jar();
+    cookies.capture(await app.request('/join', { method: 'POST' }));
+
+    const res = await app.request('/settings', {
+      headers: { ...cookies.header(), accept: 'text/html' },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe('owner only');
+  });
+
+  it('still rejects an anonymous browser under a renamed key', async () => {
+    const app = buildRenamed();
+    const res = await app.request('/settings', { headers: { accept: 'text/html' } });
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toBe('/join');
+  });
+
+  it('leaves ungated reads public under a renamed key (P-1)', async () => {
+    const res = await buildRenamed().request('/');
+    expect(res.status).toBe(200);
+  });
+
+  // The per-gate override, for a gate that runs without the middleware ahead of
+  // it or that deliberately reads a different variable.
+  it('honours an explicit contextKey on the gate itself', async () => {
+    const app = new Hono<{ Variables: { user: User | null } }>();
+    app.use('*', async (c, next) => {
+      c.set('user', USERS['persona-1'] ?? null);
+      await next();
+    });
+    app.use('/settings', requirePersona({ contextKey: 'user' }));
+    app.get('/settings', (c) => c.text('owner only'));
+
+    const res = await app.request('/settings');
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe('owner only');
+  });
+
+  it('falls back to the default key when no middleware recorded one', async () => {
+    const app = new Hono<PersonaEnv<User>>();
+    app.use('/settings', requirePersona());
+    app.get('/settings', (c) => c.text('owner only'));
+
+    const res = await app.request('/settings');
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ code: 'NOT_JOINED' });
+  });
+});

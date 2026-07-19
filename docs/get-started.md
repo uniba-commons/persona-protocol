@@ -149,6 +149,17 @@ not see even on GET — attach `requirePersona` instead, which gates every metho
 Which routes are private is your policy; the adapter only enforces the gate you
 attach.
 
+If your routes already read the current user under another name, pass
+`contextKey` and keep your call sites:
+
+```ts
+app.use('*', personaMiddleware({ cookies, resolvePersona, contextKey: 'user' }))
+app.use('/settings', requirePersona({ redirectTo: '/join' }))  // follows 'user'
+```
+
+The gates read whichever key the middleware wrote, so you set it once. With a
+custom key, type your app's `Env` yourself — `PersonaEnv` only types `persona`.
+
 ## Adopting it
 
 persona-protocol is a contract first, so how you take it up depends on what you
