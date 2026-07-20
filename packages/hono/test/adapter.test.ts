@@ -292,4 +292,73 @@ describe('persona-hono contextKey composition', () => {
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ code: 'NOT_JOINED' });
   });
+
+  // A gate downstream of a *nested* personaMiddleware resolves against the
+  // nearest preceding one, not the outermost. Pinned so the arrangement has a
+  // defined answer rather than an incidental one.
+  it('resolves against the nearest preceding middleware when routers nest', async () => {
+    const cookies = createPersonaCookies({ secret: SECRET, secure: false });
+    const resolvePersona = (sub: string) => USERS[sub] ?? null;
+
+    const inner = new Hono<{ Variables: { inner: User | null } }>();
+    inner.use('*', personaMiddleware({ cookies, resolvePersona, contextKey: 'inner' }));
+    inner.use('/x', requirePersona({ redirectTo: '/join' }));
+    inner.get('/x', (c) => c.json({ inner: c.get('inner')?.id ?? null }));
+
+    const app = new Hono<{ Variables: { outer: User | null } }>();
+    app.use('*', personaMiddleware({ cookies, resolvePersona, contextKey: 'outer' }));
+    app.post('/join', async (c) => {
+      await cookies.setSession(c, { sub: 'persona-1' });
+      return c.json({ joined: true });
+    });
+    app.route('/sub', inner);
+
+    const jarred = jar();
+    jarred.capture(await app.request('/join', { method: 'POST' }));
+
+    const res = await app.request('/sub/x', { headers: jarred.header() });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ inner: 'persona-1' });
+  });
+});
+
+// A gate only ever reads what personaMiddleware wrote, so registering it first
+// rejects everyone. That is not specific to contextKey — it bites the default
+// key identically, and did so before the gates learned to follow the key. These
+// pin the symptom so it is named rather than rediscovered.
+describe('persona-hono gate ordering', () => {
+  function buildMisordered(opts: { contextKey?: string } = {}) {
+    const cookies = createPersonaCookies({ secret: SECRET, secure: false });
+    const app = new Hono<{ Variables: Record<string, User | null> }>();
+    app.post('/join', async (c) => {
+      await cookies.setSession(c, { sub: 'persona-1' });
+      return c.json({ joined: true });
+    });
+    // Wrong order on purpose: the gate runs before the persona is resolved.
+    app.use('/settings', requirePersona({ redirectTo: '/join' }));
+    app.use(
+      '*',
+      personaMiddleware({ cookies, resolvePersona: (sub) => USERS[sub] ?? null, ...opts }),
+    );
+    app.get('/settings', (c) => c.text('owner only'));
+    return app;
+  }
+
+  it('rejects a joined persona when the gate precedes the middleware', async () => {
+    const app = buildMisordered({ contextKey: 'user' });
+    const cookies = jar();
+    cookies.capture(await app.request('/join', { method: 'POST' }));
+
+    const res = await app.request('/settings', { headers: cookies.header() });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects the same way under the default key, so the hazard is ordering, not contextKey', async () => {
+    const app = buildMisordered();
+    const cookies = jar();
+    cookies.capture(await app.request('/join', { method: 'POST' }));
+
+    const res = await app.request('/settings', { headers: cookies.header() });
+    expect(res.status).toBe(401);
+  });
 });

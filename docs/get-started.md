@@ -160,6 +160,10 @@ app.use('/settings', requirePersona({ redirectTo: '/join' }))  // follows 'user'
 The gates read whichever key the middleware wrote, so you set it once. With a
 custom key, type your app's `Env` yourself — `PersonaEnv` only types `persona`.
 
+Register the gates *after* `personaMiddleware`. A gate placed before it runs
+while the persona is still unresolved, so it rejects every request — a joined
+browser included. This is true of the default key too, not just a custom one.
+
 ## Adopting it
 
 persona-protocol is a contract first, so how you take it up depends on what you

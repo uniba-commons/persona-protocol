@@ -28,11 +28,20 @@ const CONTEXT_KEY_VAR = 'persona:contextKey';
 
 const DEFAULT_CONTEXT_KEY = 'persona';
 
+// The internal slot holds a *key name*, not a persona, so it is typed on its
+// own Env rather than borrowing PersonaEnv's. Narrowing the context to this
+// view keeps the cast at the boundary and self-describing: what is being
+// asserted is "this context also carries the adapter's internal var".
+type ContextKeyEnv = { Variables: { [CONTEXT_KEY_VAR]: string } };
+const internal = (c: Context): Context<ContextKeyEnv> => c as unknown as Context<ContextKeyEnv>;
+
 // The key a gate should read: an explicit per-gate override, else the key
 // personaMiddleware recorded for this request, else the default. The fallback
-// keeps a gate working when it runs without the middleware ahead of it.
+// keeps a gate working when it runs without the middleware ahead of it — note
+// it also applies when a gate runs *before* the middleware, which is a wiring
+// bug rather than a supported arrangement; see requireJoined.
 const contextKeyFor = (c: Context, override?: string): 'persona' =>
-  (override ?? c.get(CONTEXT_KEY_VAR as 'persona') ?? DEFAULT_CONTEXT_KEY) as 'persona';
+  (override ?? internal(c).get(CONTEXT_KEY_VAR) ?? DEFAULT_CONTEXT_KEY) as 'persona';
 
 // Resolves the current persona from the session cookie once per request and
 // puts it on c.var.persona (or opts.contextKey). Absence of a session, an
@@ -45,7 +54,7 @@ export const personaMiddleware = <P>(
   return async (c, next) => {
     const session = await opts.cookies.readSession(c);
     const persona = session ? await opts.resolvePersona(session.sub, c) : null;
-    c.set(CONTEXT_KEY_VAR as 'persona', key as unknown as P);
+    internal(c).set(CONTEXT_KEY_VAR, key);
     c.set(key, persona ?? null);
     await next();
   };
@@ -95,6 +104,11 @@ const rejectNotJoined = (
 // settings or profile page that must redirect an anonymous browser even on
 // GET), reach for requirePersona instead — which of your routes are private is
 // the consumer's policy, and the adapter only enforces the gate you attach.
+//
+// Register this *after* personaMiddleware. A gate that runs before it sees no
+// resolved persona and rejects every request, joined or not — true of any key,
+// including the default, since the variable the gate reads has not been written
+// yet.
 export const requireJoined = <P = unknown>(
   opts: RequireJoinedOptions = {},
 ): MiddlewareHandler<PersonaEnv<P>> => {
