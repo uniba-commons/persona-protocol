@@ -11,3 +11,6 @@ gems/persona/Gemfile.lock
 
 # Built gem artifacts
 *.gem
+
+# macOS
+.DS_Store

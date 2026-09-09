@@ -53,10 +53,10 @@ export const generateAgentId = (): string => {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 };
 
-// Wipe the persisted agent_id so the browser falls back to anonymous
-// on the next request. Used when the user revokes their own binding
-// from /settings/info — the server-side binding is gone, so the local
-// id no longer resolves to anything.
+// Wipe the persisted agent_id so the browser falls back to anonymous on the
+// next request. Used when the application drops this browser's persona — for
+// example after the person revokes their own binding server-side, leaving the
+// local id resolving to nothing.
 export const clearAgentId = (): void => {
   cached = null;
   try {

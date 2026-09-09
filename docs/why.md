@@ -31,11 +31,13 @@ an "anonymous user #48213" — they were nobody, by design.
 
 ### 2. The browser is the entity, not an account you log into
 
-A persona is anchored to a self-asserted key the browser holds. The server
-**never issues that key and never echoes it back** — so there is no server-owned
-identifier a user can be trapped inside. To use the same persona on a second
-browser, the first one issues a **single-use claim code**; there is no password,
-no email round-trip, no account recovery desk.
+A persona is anchored to a self-asserted key the browser holds — in the header
+profile the browser generates it itself. Whoever generates it, the key is
+**never derived from a verified identity, and never echoed back after the moment
+it is acquired** — so there is no server-owned identifier a user can be trapped
+inside. To use the same persona on a second browser, the first one issues a
+**single-use claim code**; there is no password, no email round-trip, no account
+recovery desk.
 
 ### 3. Merge is part of the protocol
 

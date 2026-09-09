@@ -5,12 +5,11 @@ require 'jwt'
 # locally generated RS256 keypair signs id_tokens, and a fake HTTP client
 # stands in for the IdP's discovery, token, and JWKS endpoints. This proves the
 # full validation path (signature, iss/aud/exp/nonce, claim checks, key
-# rotation) without a live authorization server — the "conformance without
-# uniba/auth" path the roadmap's definition of done allows. Mirrors the
-# TypeScript oidc_verifier.test.ts.
+# rotation) without a live authorization server. Mirrors the TypeScript
+# oidc_verifier.test.ts.
 describe Persona::Oidc::Verifier do
   ISSUER = 'https://auth.example.test'.freeze
-  CLIENT_ID = 'persona-kit-client'.freeze
+  CLIENT_ID = 'example-client'.freeze
   REDIRECT = 'https://app.example.test/auth/oidc/callback'.freeze
   NOW = 1_800_000_000
 
