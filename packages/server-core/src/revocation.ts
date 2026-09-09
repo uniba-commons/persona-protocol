@@ -113,16 +113,39 @@ const previewFor = async <User extends { id: unknown }>(
 // carried over from an earlier response, which is the re-evaluation P-22 asks
 // for: a binding that became the last one while the user was deciding gets a
 // preview rather than a silent removal.
-export const performRevocation = async <User extends { id: unknown }>(opts: {
-  target: RevocationTarget;
+export type RevocationOptions<User extends { id: unknown }> = {
   currentUser: User | null;
-  // The agent_uid the request arrived on, so an agent revocation can tell
-  // whether it removed the acting browser's own access (P-23).
-  actingAgentUid?: string;
   confirm?: boolean;
   store: RevocableStore<User>;
-}): Promise<RevocationResult> => {
-  const { target, currentUser, actingAgentUid, confirm = false } = opts;
+} & (
+  | { target: { kind: 'account'; provider: string; subject: string } }
+  // Required, not optional: clearCredential is decided by comparing this to
+  // the target, so an adapter that forgets it silently reports "keep your
+  // credential" for a browser that just revoked its own access. In the cookie
+  // profile that signal is the only one — the client cannot clear the cookie
+  // itself — so the failure would leave a live session for a persona this
+  // browser no longer holds. Pass null to say "not this browser".
+  | { target: { kind: 'agent'; agentUid: string }; actingAgentUid: string | null }
+);
+
+const notFound = (): RevocationResult => ({
+  revoked: false,
+  preview: null,
+  code: BINDING_NOT_FOUND_CODE,
+  clearCredential: false,
+});
+
+// TypeScript does not narrow the options union from the nested target.kind,
+// so the discriminant is read through a predicate rather than a cast.
+const isAgentCall = <User extends { id: unknown }>(
+  opts: RevocationOptions<User>,
+): opts is Extract<RevocationOptions<User>, { target: { kind: 'agent' } }> =>
+  opts.target.kind === 'agent';
+
+export const performRevocation = async <User extends { id: unknown }>(
+  opts: RevocationOptions<User>,
+): Promise<RevocationResult> => {
+  const { currentUser, confirm = false } = opts;
 
   // P-8: identity decisions happen on credentialed requests. An anonymous
   // browser has no persona whose bindings it could revoke.
@@ -132,15 +155,20 @@ export const performRevocation = async <User extends { id: unknown }>(opts: {
 
   const store = requireRevocationStore(opts.store);
 
-  if (target.kind === 'agent') {
+  if (isAgentCall(opts)) {
+    const { target, actingAgentUid } = opts;
     // P-23's counterpart to an account revocation: this removes one browser's
     // access, and is single-step — P-22 governs the last *account* binding.
-    const removed = await store.withinTransaction(() =>
-      store.revokeAgentBinding(currentUser, target.agentUid),
-    );
-    if (!removed) {
-      return { revoked: false, preview: null, code: BINDING_NOT_FOUND_CODE, clearCredential: false };
-    }
+    //
+    // The ownership check is the kit's, not the store's: hasAgentBinding is
+    // already required of every store, so scoping here means a store whose
+    // delete forgets its user predicate still cannot revoke another persona's
+    // browser (P-20).
+    const removed = await store.withinTransaction(async () => {
+      if (!(await store.hasAgentBinding(currentUser, target.agentUid))) return false;
+      return store.revokeAgentBinding(currentUser, target.agentUid);
+    });
+    if (!removed) return notFound();
     return {
       revoked: true,
       preview: null,
@@ -149,27 +177,28 @@ export const performRevocation = async <User extends { id: unknown }>(opts: {
     };
   }
 
-  const bindings = await store.listAccountBindings(currentUser);
-  const held = bindings.some((b) => b.provider === target.provider && b.subject === target.subject);
-  if (!held) {
-    return { revoked: false, preview: null, code: BINDING_NOT_FOUND_CODE, clearCredential: false };
-  }
+  const { target } = opts;
 
-  const remaining = bindings.length - 1;
-  if (remaining === 0 && !confirm) {
-    return {
-      revoked: false,
-      preview: await previewFor(store, currentUser, remaining),
-      code: null,
-      clearCredential: false,
-    };
-  }
+  // Read, decide and write in one atomic scope. Splitting them lets two
+  // concurrent revocations each see a binding that is not the last, and
+  // together take the last one without either showing a preview — exactly
+  // what P-22 exists to prevent.
+  return store.withinTransaction(async () => {
+    const bindings = await store.listAccountBindings(currentUser);
+    const held = bindings.some((b) => b.provider === target.provider && b.subject === target.subject);
+    if (!held) return notFound();
 
-  const removed = await store.withinTransaction(() =>
-    store.revokeAccountBinding(currentUser, target.provider, target.subject),
-  );
-  if (!removed) {
-    return { revoked: false, preview: null, code: BINDING_NOT_FOUND_CODE, clearCredential: false };
-  }
-  return { revoked: true, preview: null, code: null, clearCredential: false };
+    const remaining = bindings.length - 1;
+    if (remaining === 0 && !confirm) {
+      return {
+        revoked: false,
+        preview: await previewFor(store, currentUser, remaining),
+        code: null,
+        clearCredential: false,
+      };
+    }
+
+    const removed = await store.revokeAccountBinding(currentUser, target.provider, target.subject);
+    return removed ? { revoked: true, preview: null, code: null, clearCredential: false } : notFound();
+  });
 };

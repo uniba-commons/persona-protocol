@@ -164,10 +164,67 @@ describe('performRevocation — agent bindings (P-23)', () => {
     const result = await performRevocation({
       target: { kind: 'agent', agentUid: 'agent-never-seen' },
       currentUser: me,
+      actingAgentUid: 'agent-me',
       store,
     });
 
     expect(result.code).toBe(BINDING_NOT_FOUND_CODE);
+  });
+});
+
+describe('performRevocation — the kit owns the ownership check (P-20)', () => {
+  it("refuses another persona's browser even when the store forgets to scope", async () => {
+    const store = new FakeAccountLinkStore();
+    const other = await persona(store, 'agent-other', IDP);
+    const me = await persona(store, 'agent-me', OTHER);
+    // A store whose delete ignores the user, the way a hand-written
+    // `delete from browsers where bid = $1` would.
+    store.revokeAgentBinding = async (_user, agentUid) => {
+      const i = store.agentBindings.findIndex((b) => b.agentUid === agentUid);
+      if (i === -1) return false;
+      store.agentBindings.splice(i, 1);
+      return true;
+    };
+
+    const result = await performRevocation({
+      target: { kind: 'agent', agentUid: 'agent-other' },
+      currentUser: me,
+      actingAgentUid: 'agent-me',
+      store,
+    });
+
+    expect(result.code).toBe(BINDING_NOT_FOUND_CODE);
+    expect(await store.countAgentBindings(other)).toBe(1);
+  });
+});
+
+describe('performRevocation — the last-binding decision is atomic (P-22)', () => {
+  it('decides and removes inside one transaction', async () => {
+    const store = new FakeAccountLinkStore();
+    const me = await persona(store, 'agent-me', IDP, OTHER);
+    // Reads that inform the decision must be inside the transaction, or two
+    // concurrent revocations can each see a binding that is not the last and
+    // together take the last one with no preview.
+    const inside: string[] = [];
+    let depth = 0;
+    const original = store.withinTransaction.bind(store);
+    store.withinTransaction = async (fn) => {
+      depth += 1;
+      try {
+        return await original(fn);
+      } finally {
+        depth -= 1;
+      }
+    };
+    const list = store.listAccountBindings.bind(store);
+    store.listAccountBindings = async (user) => {
+      inside.push(depth > 0 ? 'in' : 'out');
+      return list(user);
+    };
+
+    await revokeAccount(store, me, IDP);
+
+    expect(inside).toEqual(['in']);
   });
 });
 

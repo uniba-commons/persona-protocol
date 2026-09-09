@@ -201,6 +201,13 @@ end
 `performRevocation` / `supportsRevocation`, with `preview`, `code` and
 `clearCredential` on the result.
 
+One trap before you wire the port to a schema: the protocol's `agent_uid` is
+**per browser**. If your own tables have a column of that name meaning something
+else — a portable key the person carries between browsers, one per persona — the
+protocol's agent binding is your *browser* row, not that column. Wiring by name
+would make `revokeAgentBinding` delete the portable key and lock the persona out
+of every browser at once.
+
 Two things are worth knowing before wiring a settings screen. A persona **may
 hold any number of account bindings** ([P-13a](/spec/claims#p-13a)), so render
 the list as 0..n rather than a single row with one revoke control. And revoking

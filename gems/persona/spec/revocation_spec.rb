@@ -141,8 +141,67 @@ describe Persona::Revocation do
     it 'reports an unknown browser as BINDING_NOT_FOUND' do
       me = persona(store, 'agent-me', IDP)
 
-      expect(revoke_agent(me, 'agent-never-seen', acting: nil).code)
+      expect(revoke_agent(me, 'agent-never-seen', acting: 'agent-me').code)
         .to eq Persona::BINDING_NOT_FOUND_CODE
+    end
+  end
+
+  describe 'the gem owns the ownership check (P-20)' do
+    it "refuses another persona's browser even when the store forgets to scope" do
+      other = persona(store, 'agent-other', IDP)
+      me = persona(store, 'agent-me', OTHER)
+      # A store whose delete ignores the user, the way a hand-written
+      # "delete from agent_bindings where agent_uid = ?" would.
+      def store.revoke_agent_binding!(_user, agent_uid:)
+        before = @agent_bindings.length
+        @agent_bindings.reject! { |b| b[:agent_uid] == agent_uid }
+        @agent_bindings.length < before
+      end
+
+      result = described_class.perform(target: { agent_uid: 'agent-other' }, current_user: me,
+                                       acting_agent_uid: 'agent-me', store: store)
+
+      expect(result.code).to eq Persona::BINDING_NOT_FOUND_CODE
+      expect(store.agent_bindings_count(other)).to eq 1
+    end
+
+    # No TypeScript counterpart: there the options union makes actingAgentUid
+    # required at compile time for an agent target, so there is nothing to
+    # assert at runtime.
+    it 'requires acting_agent_uid on an agent revocation rather than defaulting it' do
+      me = persona(store, 'agent-me', IDP)
+
+      expect {
+        described_class.perform(target: { agent_uid: 'agent-me' }, current_user: me, store: store)
+      }.to raise_error(ArgumentError, /acting_agent_uid/)
+    end
+  end
+
+  describe 'the last-binding decision is atomic (P-22)' do
+    it 'decides and removes inside one transaction' do
+      me = persona(store, 'agent-me', IDP, OTHER)
+      # Reads that inform the decision must be inside the transaction, or two
+      # concurrent revocations can each see a binding that is not the last and
+      # together take the last one with no preview.
+      seen = []
+      depth = 0
+      store.define_singleton_method(:within_transaction) do |&block|
+        depth += 1
+        begin
+          block.call
+        ensure
+          depth -= 1
+        end
+      end
+      store.define_singleton_method(:account_bindings_for) do |user|
+        seen << (depth.positive? ? :in : :out)
+        @account_bindings.select { |b| b[:user_id] == user.id }
+                         .map { |b| { provider: b[:provider], subject: b[:subject] } }
+      end
+
+      revoke_account(me, IDP)
+
+      expect(seen).to eq [:in]
     end
   end
 

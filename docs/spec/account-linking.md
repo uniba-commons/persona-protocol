@@ -112,6 +112,12 @@ browser may link or revoke in between. Implementations **SHOULD** re-evaluate at
 confirm time and fall back to a fresh preview if the answer differs, as
 [P-12](/spec/claims#p-12) requires of merges.
 
+That re-evaluation and the removal **MUST** happen in one atomic scope. Read
+outside it and two concurrent revocations of a persona's two bindings each see a
+binding that is not the last, and together take the last one without either
+having shown a preview — the rule defeated by exactly the interleaving it was
+written for.
+
 This is the same shape as [P-6](/spec/invariants#p-6) for a different reason:
 P-6 protects against resolving a conflict in one step, P-22 against discarding
 the last recoverable route in one step.
@@ -183,7 +189,11 @@ domain:
 | **revoke** | removes one binding | the removal, or a preview ([P-22](#p-22)) |
 | **list** | reads the persona's account bindings | provider and subject per binding, never a credential ([P-3](/spec/invariants#p-3)) |
 
-**list** is not decoration. A persona **MAY** hold any number of account
+A deployment that registers no provider offers no account bindings at all, and
+these moves are inert there ([P-25](#p-25)'s `ACCOUNT_LINKING_DISABLED`); an
+implementation **MAY** still support revoking **agent** bindings, which is a
+persona-level capability rather than a linking one. **list** is not
+decoration. A persona **MAY** hold any number of account
 bindings ([P-13a](/spec/claims#p-13a)), so an interface that shows one binding
 and a single revoke control is already wrong for the second one. Every move
 except **begin** operates on a persona and therefore requires a credentialed

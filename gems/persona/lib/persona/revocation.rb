@@ -20,6 +20,10 @@ module Persona
   # The two revoke_* methods return false when the persona holds no such
   # binding, which is also the answer when it belongs to someone else (P-25).
   module Revocation
+    # Distinguishes "acting_agent_uid: nil was passed" from "not passed".
+    UNSET = Object.new.freeze
+    private_constant :UNSET
+
     STORE_METHODS = %i[
       account_bindings_for
       revoke_account_binding!
@@ -64,7 +68,7 @@ module Persona
     # { agent_uid: } for an agent binding. acting_agent_uid is the agent_uid
     # the request arrived on, so an agent revocation can tell whether it
     # removed the acting browser's own access.
-    def perform(target:, current_user:, acting_agent_uid: nil, confirm: false,
+    def perform(target:, current_user:, acting_agent_uid: UNSET, confirm: false,
                 store: Persona.config.account_link_store)
       # P-8: identity decisions happen on credentialed requests. An anonymous
       # browser has no persona whose bindings it could revoke.
@@ -74,6 +78,13 @@ module Persona
       store = require_store!(store)
 
       if target[:agent_uid]
+        # Required, not defaulted: clear_credential is decided by comparing
+        # this to the target, so a caller that omits it would silently report
+        # "keep your credential" for a browser that just revoked its own
+        # access. Pass nil to say "not this browser".
+        raise ArgumentError, 'acting_agent_uid: is required when revoking an agent binding ' \
+                             '(pass nil if the request is not from that browser)' if acting_agent_uid == UNSET
+
         return revoke_agent(target[:agent_uid], current_user, acting_agent_uid, store)
       end
 
@@ -94,9 +105,18 @@ module Persona
 
     # P-23's counterpart to an account revocation: removes one browser's
     # access, and is single-step — P-22 governs the last *account* binding.
+    #
+    # The ownership check is the gem's, not the store's: agent_binding? is
+    # already required of every store, so scoping here means a store whose
+    # delete forgets its user predicate still cannot revoke another persona's
+    # browser (P-20).
     def revoke_agent(agent_uid, current_user, acting_agent_uid, store)
       removed = store.within_transaction do
-        store.revoke_agent_binding!(current_user, agent_uid: agent_uid)
+        if store.agent_binding?(current_user, agent_uid: agent_uid)
+          store.revoke_agent_binding!(current_user, agent_uid: agent_uid)
+        else
+          false
+        end
       end
       return not_found unless removed
 
@@ -104,23 +124,27 @@ module Persona
                  clear_credential: acting_agent_uid == agent_uid)
     end
 
+    # Read, decide and write in one atomic scope. Splitting them lets two
+    # concurrent revocations each see a binding that is not the last, and
+    # together take the last one without either showing a preview — exactly
+    # what P-22 exists to prevent.
     def revoke_account(provider, subject, current_user, confirm, store)
-      bindings = store.account_bindings_for(current_user)
-      held = bindings.any? { |b| b[:provider] == provider && b[:subject] == subject }
-      return not_found unless held
+      store.within_transaction do
+        bindings = store.account_bindings_for(current_user)
+        held = bindings.any? { |b| b[:provider] == provider && b[:subject] == subject }
+        next not_found unless held
 
-      remaining = bindings.length - 1
-      if remaining.zero? && !confirm
-        return Result.new(revoked: false, code: nil, clear_credential: false,
+        remaining = bindings.length - 1
+        if remaining.zero? && !confirm
+          next Result.new(revoked: false, code: nil, clear_credential: false,
                           preview: preview_for(store, current_user, remaining))
-      end
+        end
 
-      removed = store.within_transaction do
-        store.revoke_account_binding!(current_user, provider: provider, subject: subject)
-      end
-      return not_found unless removed
+        removed = store.revoke_account_binding!(current_user, provider: provider, subject: subject)
+        next not_found unless removed
 
-      Result.new(revoked: true, preview: nil, code: nil, clear_credential: false)
+        Result.new(revoked: true, preview: nil, code: nil, clear_credential: false)
+      end
     end
 
     def preview_for(store, user, remaining)
