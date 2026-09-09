@@ -164,6 +164,49 @@ Register the gates *after* `personaMiddleware`. A gate placed before it runs
 while the persona is still unresolved, so it rejects every request — a joined
 browser included. This is true of the default key too, not just a custom one.
 
+### Revocation and the four moves
+
+Account linking has four moves — **begin**, **complete**, **revoke**, **list**
+([P-24](/spec/account-linking#p-24)) — and the last two arrive with revocation.
+They are opt-in on the storage side: implement the optional half of the port and
+the moves work, leave it out and the store is simply a store without revocation.
+That is an adoption ramp, not a conformance exemption — P-24 asks a deployment
+offering account linking for all four moves, so a store without the optional
+half is on its way there rather than finished.
+
+```ruby
+# Ask before offering the moves, rather than finding out at request time.
+Persona::Revocation.supported?(store) # => true once the port's five methods exist
+
+result = Persona::Revocation.perform(
+  target: { provider: 'example-idp', subject: 'person-1' },
+  current_user: current_user,
+  acting_agent_uid: request.headers[Persona::AGENT_ID_HEADER],
+)
+
+if result.preview
+  # The last account binding: nothing changed yet. Show what survives —
+  # result.preview.outstanding_claim_code and .remaining_agent_bindings — and
+  # re-call with confirm: true (P-22, P-22a).
+elsif result.code
+  # A protocol state (P-25): BINDING_NOT_FOUND or NOT_JOINED.
+elsif result.clear_credential
+  # An agent binding went, and it was this browser's own: drop the stored
+  # credential (P-23). Header profile: clearAgentId() on the client.
+end
+```
+
+`@uniba-commons/persona-server-core` exposes the same shape as
+`performRevocation` / `supportsRevocation`, with `preview`, `code` and
+`clearCredential` on the result.
+
+Two things are worth knowing before wiring a settings screen. A persona **may
+hold any number of account bindings** ([P-13a](/spec/claims#p-13a)), so render
+the list as 0..n rather than a single row with one revoke control. And revoking
+an *account* binding never touches the browser's credential — that is what
+revoking an *agent* binding does, and the two sit next to each other in most
+UIs while being different operations.
+
 ## Adopting it
 
 persona-protocol is a contract first, so how you take it up depends on what you

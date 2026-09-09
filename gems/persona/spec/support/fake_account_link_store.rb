@@ -48,6 +48,44 @@ class FakeAccountLinkStore
     MergePreview.new(source_id: source.id, target_id: target.id)
   end
 
+  # --- optional revocation port (docs/spec P-20..P-23, P-24 "list") ---
+
+  # Claim codes the persona has issued and not yet consumed; the port only
+  # needs to know whether any remain (P-22a).
+  def outstanding_claim_codes
+    @outstanding_claim_codes ||= []
+  end
+
+  # Named _for like holder_for: a consumer's store object often already has a
+  # zero-argument `account_bindings` association, and the port must not
+  # collide with it.
+  def account_bindings_for(user)
+    @account_bindings.select { |b| b[:user_id] == user.id }
+                     .map { |b| { provider: b[:provider], subject: b[:subject] } }
+  end
+
+  def revoke_account_binding!(user, provider:, subject:)
+    before = @account_bindings.length
+    @account_bindings.reject! do |b|
+      b[:user_id] == user.id && b[:provider] == provider && b[:subject] == subject
+    end
+    @account_bindings.length < before
+  end
+
+  def revoke_agent_binding!(user, agent_uid:)
+    before = @agent_bindings.length
+    @agent_bindings.reject! { |b| b[:user_id] == user.id && b[:agent_uid] == agent_uid }
+    @agent_bindings.length < before
+  end
+
+  def agent_bindings_count(user)
+    @agent_bindings.count { |b| b[:user_id] == user.id }
+  end
+
+  def outstanding_claim_code?(user)
+    outstanding_claim_codes.include?(user.id)
+  end
+
   def merge!(source:, target:)
     @agent_bindings.each { |b| b[:user_id] = target.id if b[:user_id] == source.id }
     @account_bindings.each { |b| b[:user_id] = target.id if b[:user_id] == source.id }

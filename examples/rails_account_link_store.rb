@@ -39,4 +39,39 @@ class RailsAccountLinkStore
   def merge!(source:, target:)
     UserMerge.merge!(source: source, target: target)
   end
+
+  # --- optional revocation port (docs/spec P-20..P-23, P-24 "list") ---
+  #
+  # Leave these out and the store is simply a store without revocation:
+  # Persona::Revocation.supported?(store) reports false and the app does not
+  # offer the revoke/list moves. Implement them and the moves work with no
+  # other change.
+
+  # Named _for, not account_bindings, so the port cannot collide with the
+  # association of the same name on a consumer's own store object.
+  def account_bindings_for(user)
+    user.account_bindings.pluck(:provider, :subject)
+        .map { |provider, subject| { provider: provider, subject: subject } }
+  end
+
+  # Scoped to the user, so a binding held by another persona is reported as
+  # absent (P-20 / P-25) rather than removed.
+  def revoke_account_binding!(user, provider:, subject:)
+    user.account_bindings.where(provider: provider, subject: subject).destroy_all.any?
+  end
+
+  def revoke_agent_binding!(user, agent_uid:)
+    user.agent_bindings.where(agent_uid: agent_uid).destroy_all.any?
+  end
+
+  def agent_bindings_count(user)
+    user.agent_bindings.count
+  end
+
+  # P-22a: whether a claim code the user could still redeem elsewhere remains.
+  # Codes are stored as digests and consumed once (P-7), so this asks about
+  # the unconsumed ones.
+  def outstanding_claim_code?(user)
+    user.claim_codes.unconsumed.exists?
+  end
 end

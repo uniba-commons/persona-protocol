@@ -15,6 +15,9 @@ describe 'conformance: wire names' do
     expect(Persona::AGENT_ID_HEADER).to eq fixture[:agent_id_header]
     expect(Persona::AGENT_ID_PARAM).to eq fixture[:agent_id_param]
     expect(Persona::NOT_JOINED_CODE).to eq fixture[:not_joined_code]
+    expect(Persona::ACCOUNT_LINKING_DISABLED_CODE).to eq fixture[:account_linking_disabled_code]
+    expect(Persona::INVALID_ACCOUNT_LINK_CODE).to eq fixture[:invalid_account_link_code]
+    expect(Persona::BINDING_NOT_FOUND_CODE).to eq fixture[:binding_not_found_code]
   end
 end
 
@@ -63,6 +66,11 @@ describe 'conformance: claim decision table' do
         if given[:holder].is_a?(Hash)
           h = store.create_guest!(agent_uid: given[:holder][:agent_uid])
           store.add_account_binding!(h, provider: identity.provider, subject: identity.subject)
+          # P-21: a revoked binding leaves the subject with no holder, so the
+          # table is entered as if it had never been linked.
+          if given[:holder][:then_revoked]
+            store.revoke_account_binding!(h, provider: identity.provider, subject: identity.subject)
+          end
           h
         end
       current_user =

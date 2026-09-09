@@ -3,7 +3,14 @@
 // verification, single-use claim codes, and the claim decision table.
 // Framework wiring (cookie attributes, routes, middleware) lives in the
 // adapter packages.
-export { AGENT_ID_HEADER, AGENT_ID_PARAM, NOT_JOINED_CODE } from '@uniba-commons/persona-core';
+export {
+  AGENT_ID_HEADER,
+  AGENT_ID_PARAM,
+  NOT_JOINED_CODE,
+  ACCOUNT_LINKING_DISABLED_CODE,
+  INVALID_ACCOUNT_LINK_CODE,
+  BINDING_NOT_FOUND_CODE,
+} from '@uniba-commons/persona-core';
 export { createSessionCodec, type SessionCodec, type SessionPayload } from './session.js';
 export {
   CLAIM_CODE_ALPHABET,
@@ -18,6 +25,16 @@ export {
   type AccountLinkResult,
   type ClaimIdentity,
 } from './account_link.js';
+export {
+  performRevocation,
+  supportsRevocation,
+  type AccountBindingRef,
+  type RevocationTarget,
+  type RevocationStore,
+  type RevocableStore,
+  type RevocationPreview,
+  type RevocationResult,
+} from './revocation.js';
 export {
   StubProvider,
   createProviderRegistry,

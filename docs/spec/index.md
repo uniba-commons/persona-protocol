@@ -1,6 +1,6 @@
 # The persona-protocol specification
 
-<div class="spec-version">Version 0.1 · draft</div>
+<div class="spec-version">Version 0.2 · draft</div>
 
 This is the whole of persona-protocol. The libraries are adapters around what is
 written here; where an implementation and this document disagree, **this

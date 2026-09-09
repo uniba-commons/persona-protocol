@@ -1,4 +1,5 @@
 import type { AccountLinkStore } from '../src/account_link.js';
+import type { AccountBindingRef, RevocationStore } from '../src/revocation.js';
 
 // In-memory implementation of the AccountLink storage port, mirroring the
 // Ruby spec fake so both languages run the same conformance vectors.
@@ -8,7 +9,7 @@ export type FakeUser = { id: number };
 type AgentBinding = { userId: number; agentUid: string; userAgent?: string };
 type AccountBinding = { userId: number; provider: string; subject: string };
 
-export class FakeAccountLinkStore implements AccountLinkStore<FakeUser> {
+export class FakeAccountLinkStore implements AccountLinkStore<FakeUser>, RevocationStore<FakeUser> {
   users: FakeUser[] = [];
   agentBindings: AgentBinding[] = [];
   accountBindings: AccountBinding[] = [];
@@ -44,6 +45,42 @@ export class FakeAccountLinkStore implements AccountLinkStore<FakeUser> {
 
   async mergePreview(source: FakeUser, target: FakeUser): Promise<unknown> {
     return { sourceId: source.id, targetId: target.id };
+  }
+
+  // --- optional revocation port (P-20..P-23, P-24 "list") ---
+
+  // Claim codes the persona has issued and not yet consumed; the port only
+  // needs to know whether any remain (P-22a).
+  outstandingClaimCodes = new Set<number>();
+
+  async listAccountBindings(user: FakeUser): Promise<AccountBindingRef[]> {
+    return this.accountBindings
+      .filter((b) => b.userId === user.id)
+      .map((b) => ({ provider: b.provider, subject: b.subject }));
+  }
+
+  async revokeAccountBinding(user: FakeUser, provider: string, subject: string): Promise<boolean> {
+    const i = this.accountBindings.findIndex(
+      (b) => b.userId === user.id && b.provider === provider && b.subject === subject,
+    );
+    if (i === -1) return false;
+    this.accountBindings.splice(i, 1);
+    return true;
+  }
+
+  async revokeAgentBinding(user: FakeUser, agentUid: string): Promise<boolean> {
+    const i = this.agentBindings.findIndex((b) => b.userId === user.id && b.agentUid === agentUid);
+    if (i === -1) return false;
+    this.agentBindings.splice(i, 1);
+    return true;
+  }
+
+  async countAgentBindings(user: FakeUser): Promise<number> {
+    return this.agentBindings.filter((b) => b.userId === user.id).length;
+  }
+
+  async hasOutstandingClaimCode(user: FakeUser): Promise<boolean> {
+    return this.outstandingClaimCodes.has(user.id);
   }
 
   async merge(source: FakeUser, target: FakeUser): Promise<void> {
