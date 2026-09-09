@@ -5,11 +5,10 @@ import { createOidcVerifierProvider, unibaAuthProvider } from '../src/index.js';
 // locally generated RS256 keypair signs id_tokens, and a fake fetch stands in
 // for the IdP's discovery, token, and JWKS endpoints. This proves the full
 // validation path (signature, iss/aud/exp/nonce, claim checks, key rotation)
-// without a live authorization server — the "conformance without uniba/auth"
-// path the roadmap's definition of done allows.
+// without a live authorization server.
 
 const ISSUER = 'https://auth.example.test';
-const CLIENT_ID = 'persona-kit-client';
+const CLIENT_ID = 'example-client';
 const REDIRECT = 'https://app.example.test/auth/oidc/callback';
 const NOW = 1_800_000_000_000; // fixed clock (ms)
 
