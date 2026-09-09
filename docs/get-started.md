@@ -186,8 +186,9 @@ result = Persona::Revocation.perform(
 
 if result.preview
   # The last account binding: nothing changed yet. Show what survives —
-  # result.preview.outstanding_claim_code and .remaining_agent_bindings — and
-  # re-call with confirm: true (P-22, P-22a).
+  # result.preview.redeemable_claim_code and .remaining_agent_bindings — and
+  # re-call with confirm: true (P-22, P-22a). With one provider registered
+  # this is every revocation, not an edge case.
 elsif result.code
   # A protocol state (P-25): BINDING_NOT_FOUND or NOT_JOINED.
 elsif result.clear_credential

@@ -63,7 +63,7 @@ describe Persona::Revocation do
       expect(preview.preview.to_h).to eq(
         last_account_binding: true,
         remaining_account_bindings: 0,
-        outstanding_claim_code: false,
+        redeemable_claim_code: false,
         remaining_agent_bindings: 1,
       )
       expect(store.account_bindings.length).to eq 1
@@ -74,11 +74,11 @@ describe Persona::Revocation do
       expect(store.account_bindings).to be_empty
     end
 
-    it 'reports an outstanding claim code, so the preview does not read as stranding (P-22a)' do
+    it 'reports a redeemable claim code, so the preview does not read as stranding (P-22a)' do
       me = persona(store, 'agent-me', IDP)
-      store.outstanding_claim_codes << me.id
+      store.redeemable_claim_codes << me.id
 
-      expect(revoke_account(me, IDP).preview.outstanding_claim_code).to be true
+      expect(revoke_account(me, IDP).preview.redeemable_claim_code).to be true
     end
 
     it 'frees the subject, so a later link is a fresh bind (P-21)' do

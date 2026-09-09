@@ -51,7 +51,7 @@ export class FakeAccountLinkStore implements AccountLinkStore<FakeUser>, Revocat
 
   // Claim codes the persona has issued and not yet consumed; the port only
   // needs to know whether any remain (P-22a).
-  outstandingClaimCodes = new Set<number>();
+  redeemableClaimCodes = new Set<number>();
 
   async listAccountBindings(user: FakeUser): Promise<AccountBindingRef[]> {
     return this.accountBindings
@@ -79,8 +79,8 @@ export class FakeAccountLinkStore implements AccountLinkStore<FakeUser>, Revocat
     return this.agentBindings.filter((b) => b.userId === user.id).length;
   }
 
-  async hasOutstandingClaimCode(user: FakeUser): Promise<boolean> {
-    return this.outstandingClaimCodes.has(user.id);
+  async hasRedeemableClaimCode(user: FakeUser): Promise<boolean> {
+    return this.redeemableClaimCodes.has(user.id);
   }
 
   async merge(source: FakeUser, target: FakeUser): Promise<void> {

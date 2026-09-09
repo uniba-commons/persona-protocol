@@ -65,7 +65,7 @@ describe('performRevocation — account bindings (P-21, P-22)', () => {
     expect(preview.preview).toEqual({
       lastAccountBinding: true,
       remainingAccountBindings: 0,
-      outstandingClaimCode: false,
+      redeemableClaimCode: false,
       remainingAgentBindings: 1,
     });
     expect(store.accountBindings).toHaveLength(1);
@@ -76,14 +76,14 @@ describe('performRevocation — account bindings (P-21, P-22)', () => {
     expect(store.accountBindings).toHaveLength(0);
   });
 
-  it('reports an outstanding claim code, so the preview does not read as stranding (P-22a)', async () => {
+  it('reports a redeemable claim code, so the preview does not read as stranding (P-22a)', async () => {
     const store = new FakeAccountLinkStore();
     const me = await persona(store, 'agent-me', IDP);
-    store.outstandingClaimCodes.add(me.id);
+    store.redeemableClaimCodes.add(me.id);
 
     const { preview } = await revokeAccount(store, me, IDP);
 
-    expect(preview?.outstandingClaimCode).toBe(true);
+    expect(preview?.redeemableClaimCode).toBe(true);
   });
 
   it('frees the subject, so a later link is a fresh bind (P-21)', async () => {

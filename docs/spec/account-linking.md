@@ -86,6 +86,11 @@ A binding **MUST** only be revoked by a credentialed request
 NOT** be able to revoke a binding of a persona it does not resolve to:
 revocation is never a path to affect another persona.
 
+This says who *may* revoke, not that every revocation must be granted. A
+deployment **MAY** refuse one of its own accord — keeping a persona's last
+browser, say — and such a refusal is policy above the protocol, not a
+deviation from it.
+
 ### P-21 — Revocation frees the subject {#p-21}
 
 Once an account binding is revoked, its `(provider, subject)` pair **MUST**
@@ -112,19 +117,36 @@ P-6 protects against resolving a conflict in one step, P-22 against discarding
 the last recoverable route in one step.
 
 The trigger is deliberately coarse. "The last account binding" is not the same
-question as "no recovery route remains" — a persona holding an unconsumed claim
+question as "no recovery route remains" — a persona holding a redeemable claim
 code still has one — but it over-triggers rather than under-triggers, and it is
 answerable from the binding list the caller already has, without reaching into
-claim-code state. What keeps the coarseness from misinforming the person is what
-the preview must contain.
+claim-code state.
+
+Coarse is not rare. A deployment that registers one provider reaches this case
+on **every** revocation, so the two-step path is the ordinary one there and the
+single-step path the exception — implement the preview first, not last.
+
+What keeps the coarseness from misinforming the person is what the preview must
+contain. P-22 and P-22a are one mechanism in two parts: a preview that always
+announced the loss of the last route would be crying wolf for the persona that
+still has three browsers and a claim code, and implementing P-22 without P-22a
+leaves exactly that.
 
 ### P-22a — The preview states what remains {#p-22a}
 
 The preview **MUST** state the recovery routes that will survive the removal:
-any claim code still outstanding, and the browsers holding an agent binding.
-Where no unconsumed claim code remains, the flow **SHOULD** offer to issue one
-([P-7](/spec/invariants#p-7)) before completing. Where one does remain, the
-persona is not being stranded, and the preview **MUST NOT** say otherwise.
+any claim code that is still **redeemable**, and the browsers holding an agent
+binding. Where none remains, the flow **SHOULD** offer to issue one
+([P-7](/spec/invariants#p-7)) before completing. Where one does, the persona is
+not being stranded, and the preview **MUST NOT** say otherwise.
+
+Redeemable means the code would be accepted if presented now: unconsumed
+([P-7](/spec/invariants#p-7)) **and** within its expiry where the deployment
+sets one ([P-15](#p-15)). "Unconsumed" alone is not the question — a persona
+whose only code expired last year has no route left, and a preview computed from
+consumption alone would tell it otherwise. A deployment that issues codes with
+no expiry answers this correctly by construction, and one that has an expiry it
+does not check does not.
 
 ### P-23 — Revoking a browser clears that browser's credential {#p-23}
 

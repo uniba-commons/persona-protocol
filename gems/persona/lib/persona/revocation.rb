@@ -15,7 +15,7 @@ module Persona
   #   revoke_account_binding!(user, provider:, subject:) -> boolean
   #   revoke_agent_binding!(user, agent_uid:)      -> boolean
   #   agent_bindings_count(user)                   -> Integer
-  #   outstanding_claim_code?(user)                -> boolean
+  #   redeemable_claim_code?(user)                -> boolean
   #
   # The two revoke_* methods return false when the persona holds no such
   # binding, which is also the answer when it belongs to someone else (P-25).
@@ -25,13 +25,13 @@ module Persona
       revoke_account_binding!
       revoke_agent_binding!
       agent_bindings_count
-      outstanding_claim_code?
+      redeemable_claim_code?
     ].freeze
 
     # What P-22a requires the preview to state: the recovery routes that
     # survive the removal.
     Preview = Struct.new(:last_account_binding, :remaining_account_bindings,
-                         :outstanding_claim_code, :remaining_agent_bindings,
+                         :redeemable_claim_code, :remaining_agent_bindings,
                          keyword_init: true)
 
     # preview is present only when confirmation is required, in which case
@@ -127,7 +127,7 @@ module Persona
       Preview.new(
         last_account_binding: remaining.zero?,
         remaining_account_bindings: remaining,
-        outstanding_claim_code: store.outstanding_claim_code?(user),
+        redeemable_claim_code: store.redeemable_claim_code?(user),
         remaining_agent_bindings: store.agent_bindings_count(user),
       )
     end

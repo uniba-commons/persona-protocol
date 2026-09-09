@@ -68,10 +68,11 @@ class RailsAccountLinkStore
     user.agent_bindings.count
   end
 
-  # P-22a: whether a claim code the user could still redeem elsewhere remains.
-  # Codes are stored as digests and consumed once (P-7), so this asks about
-  # the unconsumed ones.
-  def outstanding_claim_code?(user)
-    user.claim_codes.unconsumed.exists?
+  # P-22a: whether a code would be accepted if presented now — unconsumed
+  # (P-7) and still within its expiry (P-15). A schema without an expiry
+  # column cannot answer the second half, so it answers this optimistically
+  # and the preview overstates what survives.
+  def redeemable_claim_code?(user)
+    user.claim_codes.unconsumed.where('expires_at IS NULL OR expires_at > ?', Time.current).exists?
   end
 end

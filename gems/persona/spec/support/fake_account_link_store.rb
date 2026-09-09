@@ -52,8 +52,8 @@ class FakeAccountLinkStore
 
   # Claim codes the persona has issued and not yet consumed; the port only
   # needs to know whether any remain (P-22a).
-  def outstanding_claim_codes
-    @outstanding_claim_codes ||= []
+  def redeemable_claim_codes
+    @redeemable_claim_codes ||= []
   end
 
   # Named _for like holder_for: a consumer's store object often already has a
@@ -82,8 +82,8 @@ class FakeAccountLinkStore
     @agent_bindings.count { |b| b[:user_id] == user.id }
   end
 
-  def outstanding_claim_code?(user)
-    outstanding_claim_codes.include?(user.id)
+  def redeemable_claim_code?(user)
+    redeemable_claim_codes.include?(user.id)
   end
 
   def merge!(source:, target:)

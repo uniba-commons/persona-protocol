@@ -31,7 +31,11 @@ export type RevocationStore<User> = {
   revokeAgentBinding(user: User, agentUid: string): Promise<boolean>;
   // For the P-22a preview: what would remain afterwards.
   countAgentBindings(user: User): Promise<number>;
-  hasOutstandingClaimCode(user: User): Promise<boolean>;
+  // Whether a claim code would be accepted if presented now: unconsumed (P-7)
+  // AND within its expiry where the deployment sets one (P-15). Answering from
+  // consumption alone reports a route that has in fact expired, which is the
+  // one thing P-22a's preview must not do.
+  hasRedeemableClaimCode(user: User): Promise<boolean>;
 };
 
 export type RevocableStore<User extends { id: unknown }> = AccountLinkStore<User> &
@@ -41,7 +45,7 @@ export type RevocableStore<User extends { id: unknown }> = AccountLinkStore<User
 export type RevocationPreview = {
   lastAccountBinding: boolean;
   remainingAccountBindings: number;
-  outstandingClaimCode: boolean;
+  redeemableClaimCode: boolean;
   remainingAgentBindings: number;
 };
 
@@ -61,7 +65,7 @@ const REVOCATION_METHODS = [
   'revokeAccountBinding',
   'revokeAgentBinding',
   'countAgentBindings',
-  'hasOutstandingClaimCode',
+  'hasRedeemableClaimCode',
 ] as const;
 
 // Whether this store implements the optional revocation port. Consumers use it
@@ -93,7 +97,7 @@ const previewFor = async <User extends { id: unknown }>(
 ): Promise<RevocationPreview> => ({
   lastAccountBinding: remainingAccountBindings === 0,
   remainingAccountBindings,
-  outstandingClaimCode: await store.hasOutstandingClaimCode(user),
+  redeemableClaimCode: await store.hasRedeemableClaimCode(user),
   remainingAgentBindings: await store.countAgentBindings(user),
 });
 
