@@ -1,6 +1,9 @@
 {
-  "spec": "docs/spec/header-profile.md (H-2, H-4)",
+  "spec": "docs/spec/header-profile.md (H-2, H-4), docs/spec/account-linking.md (P-25)",
   "agent_id_header": "X-Agent-Id",
   "agent_id_param": "agent_id",
-  "not_joined_code": "NOT_JOINED"
+  "not_joined_code": "NOT_JOINED",
+  "account_linking_disabled_code": "ACCOUNT_LINKING_DISABLED",
+  "invalid_account_link_code": "INVALID_ACCOUNT_LINK",
+  "binding_not_found_code": "BINDING_NOT_FOUND"
 }

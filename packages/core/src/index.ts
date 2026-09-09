@@ -3,6 +3,13 @@
 // protocol names. Transport glue (Apollo links, ActionCable param, ...)
 // lives in the sibling adapter packages; this package must stay free of
 // framework and transport dependencies.
-export { AGENT_ID_HEADER, AGENT_ID_PARAM, NOT_JOINED_CODE } from './protocol.js';
+export {
+  AGENT_ID_HEADER,
+  AGENT_ID_PARAM,
+  NOT_JOINED_CODE,
+  ACCOUNT_LINKING_DISABLED_CODE,
+  INVALID_ACCOUNT_LINK_CODE,
+  BINDING_NOT_FOUND_CODE,
+} from './protocol.js';
 export { getAgentId, setAgentId, generateAgentId, clearAgentId } from './agent_id.js';
 export { registerJoinDialogOpener, requestJoin, resolvePendingJoins } from './join_orchestrator.js';

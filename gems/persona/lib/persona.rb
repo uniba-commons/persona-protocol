@@ -6,6 +6,7 @@ require_relative 'persona/oidc'
 require_relative 'persona/oidc/verifier'
 require_relative 'persona/oidc/link_store'
 require_relative 'persona/account_link'
+require_relative 'persona/revocation'
 
 # Persona — the app-agnostic core of the "anonymous identity you carry per
 # browser" mechanism. The protocol itself is specified in docs/spec;
@@ -21,7 +22,7 @@ require_relative 'persona/account_link'
 #   - oidc_providers           registered identity providers (see oidc.rb)
 #   - account_link_store       the AccountLink storage port (see account_link.rb)
 #   - link_store               the OIDC round-trip store (see oidc/link_store.rb)
-#   - AGENT_ID_HEADER / AGENT_ID_PARAM / NOT_JOINED_CODE  the wire protocol
+#   - AGENT_ID_HEADER / AGENT_ID_PARAM / *_CODE          the wire protocol
 #
 # Consumer wiring examples live in examples/ at the repository root.
 module Persona
@@ -38,6 +39,18 @@ module Persona
   # retrying. How the code travels (GraphQL extension, HTTP status + body,
   # HTML fragment) is transport-specific — the name is the protocol.
   NOT_JOINED_CODE = 'NOT_JOINED'.freeze
+
+  # Protocol states of the account-linking flow (docs/spec P-25). Names, not
+  # transports, exactly like NOT_JOINED_CODE above.
+  #
+  #   ACCOUNT_LINKING_DISABLED  linking is off, or no provider is registered
+  #   INVALID_ACCOUNT_LINK      state / link_token unknown, consumed or expired
+  #   BINDING_NOT_FOUND         the binding to revoke is absent, or is held by
+  #                             another persona — the two are deliberately
+  #                             indistinguishable to the caller
+  ACCOUNT_LINKING_DISABLED_CODE = 'ACCOUNT_LINKING_DISABLED'.freeze
+  INVALID_ACCOUNT_LINK_CODE = 'INVALID_ACCOUNT_LINK'.freeze
+  BINDING_NOT_FOUND_CODE = 'BINDING_NOT_FOUND'.freeze
 
   # Default guest-nickname vocabulary: adjective-noun-hex, readable and
   # collision-resistant enough for a display handle. Consumers can replace

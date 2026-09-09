@@ -67,3 +67,141 @@ production.
 `state` **SHOULD** additionally be bound to the initiating browser session (per
 standard OIDC practice), not merely stored server-side, so a pasted callback URL
 cannot complete another browser's flow.
+
+## Revocation
+
+Linking is reversible. Revoking removes **one binding**; it never deletes the
+persona and it is never a merge. Two different things can be revoked, and
+conflating them is the common implementation mistake:
+
+| Revoking | Removes | Effect on the acting browser |
+| --- | --- | --- |
+| an **account binding** | one `(provider, subject)` attachment | none — the browser stays joined |
+| an **agent binding** | one browser's access to the persona | if it is the acting browser, its stored credential is discarded |
+
+### P-20 — Revocation is credentialed and self-directed {#p-20}
+
+A binding **MUST** only be revoked by a credentialed request
+([P-8](/spec/invariants#p-8)) from the persona that holds it. A browser **MUST
+NOT** be able to revoke a binding of a persona it does not resolve to:
+revocation is never a path to affect another persona.
+
+This says who *may* revoke, not that every revocation must be granted. A
+deployment **MAY** refuse one of its own accord — keeping a persona's last
+browser, say — and such a refusal is policy above the protocol, not a
+deviation from it.
+
+### P-21 — Revocation frees the subject {#p-21}
+
+Once an account binding is revoked, its `(provider, subject)` pair **MUST**
+resolve to no holder ([P-13a](/spec/claims#p-13a)). Linking the same pair again
+therefore enters the [claim table](/spec/claims) with no holder — row 1 or row 4,
+a fresh bind — and **MUST NOT** be treated as a conflict. Implementations **MUST
+NOT** keep a residue that leaves the subject resolving to the revoked binding.
+
+### P-22 — Confirm before the last verified binding goes {#p-22}
+
+Revoking a persona's **last** account binding leaves it reachable only through
+self-asserted agent bindings ([P-5](/spec/invariants#p-5)). That case **MUST** be
+a two-step operation: the first response is a preview, computed without side
+effects, and the removal happens only on a confirmed second request. Revoking a
+binding that is not the last **MAY** be single-step.
+
+Whether a binding is the last one can change between the two steps — another
+browser may link or revoke in between. Implementations **SHOULD** re-evaluate at
+confirm time and fall back to a fresh preview if the answer differs, as
+[P-12](/spec/claims#p-12) requires of merges.
+
+This is the same shape as [P-6](/spec/invariants#p-6) for a different reason:
+P-6 protects against resolving a conflict in one step, P-22 against discarding
+the last recoverable route in one step.
+
+The trigger is deliberately coarse. "The last account binding" is not the same
+question as "no recovery route remains" — a persona holding a redeemable claim
+code still has one — but it over-triggers rather than under-triggers, and it is
+answerable from the binding list the caller already has, without reaching into
+claim-code state.
+
+Coarse is not rare. A deployment that registers one provider reaches this case
+on **every** revocation, so the two-step path is the ordinary one there and the
+single-step path the exception — implement the preview first, not last.
+
+What keeps the coarseness from misinforming the person is what the preview must
+contain. P-22 and P-22a are one mechanism in two parts: a preview that always
+announced the loss of the last route would be crying wolf for the persona that
+still has three browsers and a claim code, and implementing P-22 without P-22a
+leaves exactly that.
+
+### P-22a — The preview states what remains {#p-22a}
+
+The preview **MUST** state the recovery routes that will survive the removal:
+any claim code that is still **redeemable**, and the browsers holding an agent
+binding. Where none remains, the flow **SHOULD** offer to issue one
+([P-7](/spec/invariants#p-7)) before completing. Where one does, the persona is
+not being stranded, and the preview **MUST NOT** say otherwise.
+
+Redeemable means the code would be accepted if presented now: unconsumed
+([P-7](/spec/invariants#p-7)) **and** within its expiry where the deployment
+sets one ([P-15](#p-15)). "Unconsumed" alone is not the question — a persona
+whose only code expired last year has no route left, and a preview computed from
+consumption alone would tell it otherwise. A deployment that issues codes with
+no expiry answers this correctly by construction, and one that has an expiry it
+does not check does not.
+
+### P-23 — Revoking a browser clears that browser's credential {#p-23}
+
+When the revoked agent binding belongs to the acting browser, that browser's
+stored credential **MUST** be discarded, so its subsequent requests are anonymous
+([P-1](/spec/invariants#p-1)). Which side does the discarding follows the
+profile: in the [header profile](/spec/header-profile#h-1) the client clears the
+persisted agent_uid, since the server cannot; in the
+[cookie profile](/spec/cookie-profile#c-1) the server clears the session cookie
+in the revocation response. Revoking an **account** binding **MUST NOT** clear
+it: the browser's own binding is untouched and it stays joined.
+
+A persona **MAY** end up with no bindings of either kind. It is then unreachable
+rather than deleted; a deployment **SHOULD** say so before performing the last
+revocation, and **MAY** reap such personas on its own schedule.
+
+## The operation surface
+
+Everything above describes moves an application must expose somehow. The
+transport is the application's — GraphQL mutations, REST endpoints, form posts —
+but the moves themselves are protocol-shaped, the way `NOT_JOINED` is: a client
+written against one deployment should recognise them in another.
+
+### P-24 — Four named moves {#p-24}
+
+An implementation offering account linking **MUST** expose these four moves, and
+**SHOULD** name them recognisably after the protocol rather than after its own
+domain:
+
+| Move | Does | Returns |
+| --- | --- | --- |
+| **begin** | issues `state`, returns the provider's authorize URL | the authorize URL |
+| **complete** | consumes `link_token`, runs the [claim table](/spec/claims) | the linked persona, or a merge preview ([P-6](/spec/invariants#p-6)) |
+| **revoke** | removes one binding | the removal, or a preview ([P-22](#p-22)) |
+| **list** | reads the persona's account bindings | provider and subject per binding, never a credential ([P-3](/spec/invariants#p-3)) |
+
+**list** is not decoration. A persona **MAY** hold any number of account
+bindings ([P-13a](/spec/claims#p-13a)), so an interface that shows one binding
+and a single revoke control is already wrong for the second one. Every move
+except **begin** operates on a persona and therefore requires a credentialed
+request ([P-8](/spec/invariants#p-8)).
+
+### P-25 — Canonical error codes for the link flow {#p-25}
+
+The states below are protocol states, not application errors, and **MUST** be
+signalled with these names. How a name travels is transport-specific, exactly as
+for `NOT_JOINED` ([H-4](/spec/header-profile#h-4) / [C-4](/spec/cookie-profile#c-4)).
+
+| Code | Raised when |
+| --- | --- |
+| `ACCOUNT_LINKING_DISABLED` | the deployment has linking switched off, or no provider is registered — the capability can never succeed here |
+| `INVALID_ACCOUNT_LINK` | the round-trip token (`state` or `link_token`) is unknown, already consumed, or expired ([P-15](#p-15)) |
+| `BINDING_NOT_FOUND` | the binding named for revocation is absent, **or** belongs to another persona |
+
+That last row is deliberate. Distinguishing "no such binding" from "not yours"
+would let a caller probe for bindings held by other personas, which
+[P-20](#p-20) exists to prevent; the two cases **MUST** be indistinguishable to
+the caller.

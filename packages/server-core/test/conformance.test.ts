@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { AGENT_ID_HEADER, AGENT_ID_PARAM, NOT_JOINED_CODE } from '@uniba-commons/persona-core';
+import {
+  AGENT_ID_HEADER,
+  AGENT_ID_PARAM,
+  NOT_JOINED_CODE,
+  ACCOUNT_LINKING_DISABLED_CODE,
+  INVALID_ACCOUNT_LINK_CODE,
+  BINDING_NOT_FOUND_CODE,
+} from '@uniba-commons/persona-core';
 import { performAccountLink } from '../src/account_link.js';
 import { normalizeClaimCode, formatClaimCode, digestClaimCode } from '../src/claim_code.js';
 import { createSessionCodec, type SessionPayload } from '../src/session.js';
@@ -19,6 +26,9 @@ describe('conformance: wire names', () => {
     expect(AGENT_ID_HEADER).toBe(vectors.agent_id_header);
     expect(AGENT_ID_PARAM).toBe(vectors.agent_id_param);
     expect(NOT_JOINED_CODE).toBe(vectors.not_joined_code);
+    expect(ACCOUNT_LINKING_DISABLED_CODE).toBe(vectors.account_linking_disabled_code);
+    expect(INVALID_ACCOUNT_LINK_CODE).toBe(vectors.invalid_account_link_code);
+    expect(BINDING_NOT_FOUND_CODE).toBe(vectors.binding_not_found_code);
   });
 });
 
@@ -69,6 +79,11 @@ describe('conformance: claim decision table', () => {
       if (given.holder && typeof given.holder === 'object') {
         holder = await store.createGuest(given.holder.agent_uid);
         await store.addAccountBinding(holder, identity.provider, identity.subject);
+        // P-21: a revoked binding leaves the subject with no holder, so the
+        // table is entered as if it had never been linked.
+        if (given.holder.then_revoked) {
+          await store.revokeAccountBinding(holder, identity.provider, identity.subject);
+        }
       }
       let currentUser: FakeUser | null = null;
       if (given.browser === 'joined') {

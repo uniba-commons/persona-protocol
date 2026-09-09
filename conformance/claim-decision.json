@@ -124,6 +124,29 @@
         "current_retired": true,
         "browser_binding_moved_to_holder": true
       }
+    },
+    {
+      "id": "21-relink-after-revocation-is-a-fresh-bind",
+      "spec_rule": "P-21",
+      "spec_row": 4,
+      "given": {
+        "browser": "joined",
+        "agent_uid": "agent-x",
+        "holder": {
+          "agent_uid": "agent-holder",
+          "then_revoked": true
+        },
+        "confirm_merge": false
+      },
+      "expect": {
+        "personas_delta": 0,
+        "result_user": "current",
+        "subject_holder": "current",
+        "account_bindings_delta": 1,
+        "merged": false,
+        "merge_preview": false,
+        "echoed_agent_uid": null
+      }
     }
   ]
 }

@@ -12,8 +12,10 @@ Shared test vectors run against every language implementation
 
 ## Files
 
-- `wire-names.json` — the fixed wire names. Runners assert their language's
-  exported constants equal these values.
+- `wire-names.json` — the fixed wire names and protocol-state codes
+  (`NOT_JOINED`, plus the link flow's `ACCOUNT_LINKING_DISABLED`,
+  `INVALID_ACCOUNT_LINK` and `BINDING_NOT_FOUND` — docs/spec P-25). Runners
+  assert their language's exported constants equal these values.
 - `claim-decision.json` — the §6 claim decision table. Each case sets up a
   browser state and a holder state against an in-memory storage port, runs
   the implementation's claim logic, and asserts the outcome. Keys in
@@ -23,6 +25,11 @@ Shared test vectors run against every language implementation
   - `result_user` — who the browser resolves to afterwards
     (`"new"` / `"current"` / `"holder"`)
   - `subject_holder` — who holds the subject afterwards
+
+  A `holder` object may carry `then_revoked: true`: the holder is created and
+  bound, then the binding is revoked before the case runs. Revocation frees the
+  subject (P-21), so the table is entered with no holder — the case pins that a
+  re-link is a fresh bind and not a conflict.
     (`"result"` / `"current"` / `"holder"`)
   - `result_has_agent_binding` — the result user is bound to
     `given.agent_uid`
