@@ -62,12 +62,7 @@ describe('performRevocation — account bindings (P-21, P-22)', () => {
     const preview = await revokeAccount(store, me, IDP);
 
     expect(preview.revoked).toBe(false);
-    expect(preview.preview).toEqual({
-      lastAccountBinding: true,
-      remainingAccountBindings: 0,
-      redeemableClaimCode: false,
-      remainingAgentBindings: 1,
-    });
+    expect(preview.preview).toEqual({ redeemableClaimCode: false, remainingAgentBindings: 1 });
     expect(store.accountBindings).toHaveLength(1);
 
     const confirmed = await revokeAccount(store, me, IDP, true);
@@ -104,7 +99,7 @@ describe('performRevocation — account bindings (P-21, P-22)', () => {
     const result = await revokeAccount(store, me, IDP);
 
     expect(result.revoked).toBe(false);
-    expect(result.preview?.lastAccountBinding).toBe(true);
+    expect(result.preview).not.toBeNull();
   });
 });
 

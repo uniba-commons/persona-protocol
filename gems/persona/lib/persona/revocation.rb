@@ -34,9 +34,12 @@ module Persona
 
     # What P-22a requires the preview to state: the recovery routes that
     # survive the removal.
-    Preview = Struct.new(:last_account_binding, :remaining_account_bindings,
-                         :redeemable_claim_code, :remaining_agent_bindings,
-                         keyword_init: true)
+    #
+    # A preview is produced only where P-22 asks for one — removing the last
+    # account binding — so "how many account bindings remain" is not a member
+    # here: it is zero by construction, and zero of them is not a route that
+    # survives. A caller that needs the distinction has it in `result.preview`.
+    Preview = Struct.new(:redeemable_claim_code, :remaining_agent_bindings, keyword_init: true)
 
     # preview is present only when confirmation is required, in which case
     # NOTHING was changed. code is a protocol state (P-25) or nil on success.
@@ -137,7 +140,7 @@ module Persona
         remaining = bindings.length - 1
         if remaining.zero? && !confirm
           next Result.new(revoked: false, code: nil, clear_credential: false,
-                          preview: preview_for(store, current_user, remaining))
+                          preview: preview_for(store, current_user))
         end
 
         removed = store.revoke_account_binding!(current_user, provider: provider, subject: subject)
@@ -147,10 +150,8 @@ module Persona
       end
     end
 
-    def preview_for(store, user, remaining)
+    def preview_for(store, user)
       Preview.new(
-        last_account_binding: remaining.zero?,
-        remaining_account_bindings: remaining,
         redeemable_claim_code: store.redeemable_claim_code?(user),
         remaining_agent_bindings: store.agent_bindings_count(user),
       )

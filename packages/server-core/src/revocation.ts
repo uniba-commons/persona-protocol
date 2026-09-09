@@ -42,9 +42,12 @@ export type RevocableStore<User extends { id: unknown }> = AccountLinkStore<User
   Partial<RevocationStore<User>>;
 
 // What P-22a requires the preview to state: the recovery routes that survive.
+//
+// A preview is produced only where P-22 asks for one — removing the last
+// account binding — so "how many account bindings remain" is not a field here:
+// it is zero by construction, and zero of them is not a route that survives.
+// A caller that needs the distinction has it in `preview !== null`.
 export type RevocationPreview = {
-  lastAccountBinding: boolean;
-  remainingAccountBindings: number;
   redeemableClaimCode: boolean;
   remainingAgentBindings: number;
 };
@@ -93,10 +96,7 @@ const requireRevocationStore = <User extends { id: unknown }>(
 const previewFor = async <User extends { id: unknown }>(
   store: AccountLinkStore<User> & RevocationStore<User>,
   user: User,
-  remainingAccountBindings: number,
 ): Promise<RevocationPreview> => ({
-  lastAccountBinding: remainingAccountBindings === 0,
-  remainingAccountBindings,
   redeemableClaimCode: await store.hasRedeemableClaimCode(user),
   remainingAgentBindings: await store.countAgentBindings(user),
 });
@@ -192,7 +192,7 @@ export const performRevocation = async <User extends { id: unknown }>(
     if (remaining === 0 && !confirm) {
       return {
         revoked: false,
-        preview: await previewFor(store, currentUser, remaining),
+        preview: await previewFor(store, currentUser),
         code: null,
         clearCredential: false,
       };

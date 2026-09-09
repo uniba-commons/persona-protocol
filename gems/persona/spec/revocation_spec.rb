@@ -60,12 +60,7 @@ describe Persona::Revocation do
       preview = revoke_account(me, IDP)
 
       expect(preview.revoked).to be false
-      expect(preview.preview.to_h).to eq(
-        last_account_binding: true,
-        remaining_account_bindings: 0,
-        redeemable_claim_code: false,
-        remaining_agent_bindings: 1,
-      )
+      expect(preview.preview.to_h).to eq(redeemable_claim_code: false, remaining_agent_bindings: 1)
       expect(store.account_bindings.length).to eq 1
 
       confirmed = revoke_account(me, IDP, confirm: true)
@@ -97,7 +92,7 @@ describe Persona::Revocation do
       result = revoke_account(me, IDP)
 
       expect(result.revoked).to be false
-      expect(result.preview.last_account_binding).to be true
+      expect(result.preview).not_to be_nil
     end
   end
 
