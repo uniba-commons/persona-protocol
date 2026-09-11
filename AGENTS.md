@@ -2,25 +2,37 @@
 
 ## What this repository is for
 
-Picture two applications. Each keeps its own store of personas.
+On most of the web, being someone means holding an account that a service
+issued. persona-protocol is the other arrangement: identity that begins with the
+person, which a server can only recognise.
 
-Someone arrives at one of them and gets a persona when they first write
-something. To carry it to a second browser they use a code they issued
-themselves. To attach a verified account they sign in to a provider from that
-application, and attach it there.
+The world it describes:
 
-When that person also turns up at the second application, they do all of it
-again: they get a persona there too, and they attach the same verified account
-there, themselves.
+- Anyone can read anything without being anyone. No identity exists until
+  someone writes.
+- When they write, they become someone by an act of their own: the browser
+  holds a key that no server issued and no server echoes. There is no
+  registration, so there is no issuer.
+- Staying that someone on a second browser is also their act: a code they issue
+  themselves, spent on use.
+- Being trusted is their act too: they attach a verified account from a
+  provider when it earns its place. Until then the persona lasts exactly as long
+  as they keep it. If two of their personas meet on one verified account,
+  nothing folds until they confirm it.
+- Because no one issued the identity, no one can be asked who someone is. Each
+  application knows a person exactly as far as that person has shown themselves
+  to it.
 
-Only then can the two applications treat that person as the same person — not
+That last line has a cost, and this repository keeps paying it. Picture two
+applications, each with its own store of personas. When the same person turns
+up at both, they get a persona in each, and attach the same verified account in
+each, themselves. Only then can the two treat them as the same person — not
 because one asked the other, and not because both read one store, but because
-the person attached the same thing in both.
+the person showed the same thing in both.
 
-That is more work per application. It is the price of having no centre, and this
-design pays the price on purpose. A proposal that reduces the work is usually a
-proposal to build a place that answers on someone's behalf, and what got cheaper
-has only moved there.
+That is more work per application, and it is paid on purpose. A proposal that
+reduces the work is usually a proposal for a place that answers on someone's
+behalf. That place is an issuer, and what got cheaper has only moved there.
 
 ## Working here
 
